@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+exifread
+piexif
+python-multipart
