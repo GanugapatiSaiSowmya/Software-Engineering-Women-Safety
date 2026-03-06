@@ -1,18 +1,16 @@
-const CONFIG = {
-  red:   { bg: "rgba(239,68,68,0.15)",  border: "#ef4444", color: "#ef4444", label: "HIGH RISK" },
-  amber: { bg: "rgba(245,158,11,0.15)", border: "#f59e0b", color: "#f59e0b", label: "CAUTION"   },
-  green: { bg: "rgba(16,185,129,0.15)", border: "#10b981", color: "#10b981", label: "SAFE"       },
-};
+import { useTheme } from "../context/ThemeContext";
 
 export default function RiskBadge({ level }) {
-  const c = CONFIG[level] ?? CONFIG.green;
+  const t = useTheme();
+  const cfg = {
+    red:   { bg: `${t.red}22`,   border: t.red,   color: t.red,   label: "HIGH RISK" },
+    amber: { bg: `${t.amber}22`, border: t.amber, color: t.amber, label: "CAUTION"   },
+    green: { bg: `${t.green}22`, border: t.green, color: t.green, label: "SAFE"       },
+  }[level] ?? { bg: `${t.green}22`, border: t.green, color: t.green, label: "SAFE" };
+
   return (
-    <span style={{
-      fontSize: 10, fontWeight: 700, letterSpacing: 1.5, padding: "2px 8px",
-      borderRadius: 3, background: c.bg, border: `1px solid ${c.border}`, color: c.color,
-    }}>
-      {c.label}
+    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, padding: "2px 8px", borderRadius: 3, background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }}>
+      {cfg.label}
     </span>
   );
 }
-
