@@ -5,6 +5,9 @@
 }
 
 body {
-  background: #060d1b;
-  color: #e2e8f0;
+  font-family: 'Courier New', monospace;
+}
+
+input, button {
+  font-family: 'Courier New', monospace;
 }

@@ -1,36 +1,53 @@
 import ShieldIcon from "./ShieldIcon";
 import { NAV_ITEMS } from "../utils/data";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Sidebar({ active, onNavigate }) {
+  const t = useTheme();
+
   return (
-    <nav style={{ width: 220, borderRight: "1px solid #0f172a", padding: "28px 0", flexShrink: 0 }}>
-      <div style={{ fontSize: 9, letterSpacing: 2.5, color: "#334155", padding: "0 24px", marginBottom: 16 }}>
+    <nav style={{ width: 220, borderRight: `1px solid ${t.border}`, padding: "28px 0", flexShrink: 0, background: t.sidebar }}>
+      <div style={{ fontSize: 9, letterSpacing: 2.5, color: t.dark ? t.textFaint : "#2a5a80", padding: "0 24px", marginBottom: 16 }}>
         COMMAND CENTER
       </div>
 
-      {NAV_ITEMS.map(item => (
-        <button
-          key={item.id}
-          onClick={() => onNavigate(item.id)}
-          style={{
-            display: "flex", alignItems: "center", gap: 12, width: "100%",
-            padding: "12px 24px", background: active === item.id ? "rgba(16,185,129,0.08)" : "transparent",
-            border: "none", borderLeft: `2px solid ${active === item.id ? "#10b981" : "transparent"}`,
-            cursor: "pointer", textAlign: "left", transition: "all 0.2s",
-          }}
-        >
-          <span style={{ fontSize: 16, color: active === item.id ? "#10b981" : "#334155" }}>{item.icon}</span>
-          <span style={{ fontSize: 12, color: active === item.id ? "#e2e8f0" : "#475569", letterSpacing: 0.5 }}>
-            {item.label}
-          </span>
-        </button>
-      ))}
+      {NAV_ITEMS.map(item => {
+        const isActive = active === item.id;
+        const isLive   = item.id === "guard";
+        return (
+          <button key={item.id} onClick={() => onNavigate(item.id)}
+            style={{
+              display: "flex", alignItems: "center", gap: 12, width: "100%",
+              padding: "12px 24px",
+              background: isActive ? `${t.green}12` : "transparent",
+              border: "none",
+              borderLeft: `2px solid ${isActive ? t.green : "transparent"}`,
+              cursor: "pointer", textAlign: "left", transition: "all 0.2s",
+            }}
+          >
+            <span style={{ fontSize: 16, color: isActive ? t.green : t.dark ? t.textFaint : "#2a5a80" }}>{item.icon}</span>
+            <span style={{ fontSize: 12, color: isActive ? t.text : t.dark ? t.textDim : "#0a2a45", letterSpacing: 0.5, fontFamily: "'Courier New', monospace", flex: 1 }}>
+              {item.label}
+            </span>
+            {!isLive && (
+              <span style={{
+                fontSize: 8, fontWeight: 700, letterSpacing: 1, padding: "2px 6px",
+                borderRadius: 3, border: `1px solid ${t.green}`,
+                color: t.green, background: `${t.green}12`,
+                boxShadow: `0 0 6px ${t.green}44`,
+                animation: "comingSoonPulse 2.5s ease-in-out infinite",
+                fontFamily: "'Courier New', monospace", whiteSpace: "nowrap",
+              }}>✦ COMING SOON</span>
+            )}
+          </button>
+        );
+      })}
 
-      {/* Local guarantee badge */}
-      <div style={{ margin: "28px 16px 0", padding: "12px", borderRadius: 8, background: "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.1)" }}>
+      {/* Local guarantee */}
+      <div style={{ margin: "28px 16px 0", padding: "12px", borderRadius: 8, background: `${t.green}08`, border: `1px solid ${t.green}22` }}>
         <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
           <ShieldIcon size={14} />
-          <div style={{ fontSize: 10, color: "#475569", lineHeight: 1.6 }}>
+          <div style={{ fontSize: 10, color: t.dark ? t.textDim : "#0a2a45", lineHeight: 1.6 }}>
             100% Local Processing.<br />No images leave your device.
           </div>
         </div>

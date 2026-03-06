@@ -1,7 +1,7 @@
 # Backend/metadata_agent.py
 import os
 import tempfile
-from typing import Optional, Tuple
+from typing import Optional
 
 from PIL import Image
 import piexif
@@ -49,7 +49,6 @@ def strip_gps(filepath: str) -> bool:
     Returns True on success, False on failure.
     """
     try:
-        # Open image to preserve format information
         img = Image.open(filepath)
         img_format = img.format  # e.g., "JPEG", "PNG"
 
@@ -59,30 +58,23 @@ def strip_gps(filepath: str) -> bool:
                 exif_dict["GPS"] = {}
             exif_bytes = piexif.dump(exif_dict)
         except Exception:
-            # If piexif can't load/dump, we'll save without EXIF (this strips metadata)
             exif_bytes = None
 
-        # If saving as JPEG, ensure RGB mode to avoid corrupted files
         if img_format and img_format.upper() in ("JPEG", "JPG") and img.mode != "RGB":
             img = img.convert("RGB")
 
-        # Write to temporary file first
         dir_name = os.path.dirname(filepath) or "."
         fd, tmp_path = tempfile.mkstemp(suffix=os.path.splitext(filepath)[1], dir=dir_name)
         os.close(fd)
         try:
             if exif_bytes and img_format:
-                # Preserve format and exif
                 img.save(tmp_path, format=img_format, exif=exif_bytes)
             else:
-                # Save without exif (strips metadata)
                 if img_format:
                     img.save(tmp_path, format=img_format)
                 else:
-                    # Fallback to binary copy if format unknown
                     with open(filepath, "rb") as srcf, open(tmp_path, "wb") as dstf:
                         dstf.write(srcf.read())
-            # Replace original file atomically
             os.replace(tmp_path, filepath)
         finally:
             if os.path.exists(tmp_path):
