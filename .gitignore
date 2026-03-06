@@ -15,6 +15,7 @@ frontend/dist/
 # Python libraries
 backend/venv/
 backend/__pycache__/
+backend/uploads/
 
 # React libraries
 frontend/node_modules/
