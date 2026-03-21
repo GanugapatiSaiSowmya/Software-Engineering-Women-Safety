@@ -29,7 +29,7 @@ export default function Sidebar({ active, onNavigate }) {
             <span style={{ fontSize: 12, color: isActive ? t.text : t.dark ? t.textDim : "#0a2a45", letterSpacing: 0.5, fontFamily: "'Courier New', monospace", flex: 1 }}>
               {item.label}
             </span>
-            {!isLive && (
+            {/* {!isLive && (
               <span style={{
                 fontSize: 8, fontWeight: 700, letterSpacing: 1, padding: "2px 6px",
                 borderRadius: 3, border: `1px solid ${t.green}`,
@@ -38,7 +38,7 @@ export default function Sidebar({ active, onNavigate }) {
                 animation: "comingSoonPulse 2.5s ease-in-out infinite",
                 fontFamily: "'Courier New', monospace", whiteSpace: "nowrap",
               }}>✦ COMING SOON</span>
-            )}
+            )} */}
           </button>
         );
       })}
