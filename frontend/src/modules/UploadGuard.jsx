@@ -1,3 +1,4 @@
+import { processImage } from "../utils/imageProtection";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { card, cardTitle, dot, actionBtn } from "../styles/theme";
