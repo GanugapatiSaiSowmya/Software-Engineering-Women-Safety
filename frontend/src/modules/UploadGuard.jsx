@@ -24,6 +24,9 @@ export default function UploadGuard() {
   const [toast, setToast]           = useState(null);
   const toastTimer                  = useRef(null);
 
+  // new state: backend stripped filename (e.g. "photo-stripped.jpg")
+  const [strippedFilename, setStrippedFilename] = useState(null);
+
   useEffect(() => {
     return () => {
       if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -105,12 +108,53 @@ export default function UploadGuard() {
         setGps(true);
         showToast("Done! Your location has been removed from this photo.", "success");
       }
+      // store stripped filename returned by backend (e.g. "photo-stripped.jpg")
+      if (res.data.stripped_filename) setStrippedFilename(res.data.stripped_filename);
       setAnalyzed(true);
     } catch (err) {
       const message = err?.response?.data?.detail || err?.response?.data?.message || err.message || "Error stripping GPS metadata.";
       showToast(message, "error");
     } finally {
       setAnalyzing(false);
+    }
+  };
+
+  // Download the stripped file by requesting the backend and saving a blob
+  const handleDownloadStripped = async () => {
+    if (!file) return showToast("No file available to download.", "error");
+    try {
+      const res = await axios.get("http://127.0.0.1:8000/download", {
+        params: { filename: file.name },
+        responseType: "blob",
+      });
+      const contentType = res.headers["content-type"] || file.type || "application/octet-stream";
+      const blob = new Blob([res.data], { type: contentType });
+      const url = URL.createObjectURL(blob);
+
+      // Construct a sensible download name: use strippedFilename if available, otherwise compute
+      let downloadName = strippedFilename;
+      if (!downloadName) {
+        const idx = file.name.lastIndexOf(".");
+        if (idx !== -1) {
+          const base = file.name.substring(0, idx);
+          const ext = file.name.substring(idx + 1);
+          downloadName = `${base}-stripped.${ext}`;
+        } else {
+          downloadName = `${file.name}-stripped`;
+        }
+      }
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = downloadName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast("Downloaded stripped image.", "success");
+    } catch (err) {
+      showToast("Failed to download stripped image.", "error");
+      console.error(err);
     }
   };
 
@@ -206,9 +250,14 @@ export default function UploadGuard() {
                       {gpsStripped ? "✓ Location data removed" : (realGps ? `📍 ${realGps}` : "📍 GPS metadata detected")}
                     </div>
                   </div>
-                  {!gpsStripped && (
-                    <button onClick={handleStripGps} style={actionBtn(t.red)}>STRIP GPS</button>
-                  )}
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {!gpsStripped && (
+                      <button onClick={handleStripGps} style={actionBtn(t.red)}>STRIP GPS</button>
+                    )}
+                    {(gpsStripped || strippedFilename) && (
+                      <button onClick={handleDownloadStripped} style={actionBtn(t.green)}>DOWNLOAD STRIPPED</button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -254,21 +303,6 @@ export default function UploadGuard() {
                   </div>
                 </div>
               </div>
-
-              {/* Similarity Check */}
-              <div style={{ ...card(t), border: `1px solid ${t.green}44`, background: cardBg(t.green) }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div>
-                    <div style={cardTitle(t)}><span style={dot(t.green)} />SIMILARITY CHECK</div>
-                    <div style={{ fontSize: 11, color: t.textDim, marginTop: 6, lineHeight: 1.6 }}>
-                      We check if this photo already appears in known leak databases.
-                    </div>
-                    <div style={{ fontSize: 11, color: t.green, marginTop: 4 }}>✓ No matches found in high-risk databases</div>
-                  </div>
-                  {SOON(t)}
-                </div>
-              </div>
-
 
               {/* All clear */}
               {gpsStripped && deepfake && !deepfake.is_deepfake && (
