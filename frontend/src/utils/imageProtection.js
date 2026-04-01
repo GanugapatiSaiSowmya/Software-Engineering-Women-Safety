@@ -36,3 +36,25 @@ export function processImage(file) {
         img.src = URL.createObjectURL(file);
     });
 }
+function embedWatermark(imageData, message = "SHIELD") {
+    const data = imageData.data;
+
+    // Convert message to binary
+    let binary = "";
+    for (let i = 0; i < message.length; i++) {
+        binary += message.charCodeAt(i).toString(2).padStart(8, "0");
+    }
+
+    let index = 0;
+
+    for (let i = 0; i < data.length && index < binary.length; i += 4) {
+        let bit = parseInt(binary[index]);
+
+        // Modify least significant bit of RED channel
+        data[i] = (data[i] & 0xFE) | bit;
+
+        index++;
+    }
+
+    return imageData;
+}
