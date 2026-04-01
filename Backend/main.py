@@ -5,6 +5,12 @@ from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from metadata_agent import get_gps_data, strip_gps
+from vision_agent import detect_deepfake
+from legal_agent import generate_evidence_report
+
+
+# add auth router import
+# from auth import router as auth_router
 
 app = FastAPI()
 
@@ -15,6 +21,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.get("/")
+def read_root():
+    return {"message": "SHIELD.ai Backend is Active", "version": "1.0.0"}
+
+# include auth endpoints under /auth
+# app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
 UPLOAD_DIR = "uploads"
 if not os.path.exists(UPLOAD_DIR):
@@ -26,15 +38,22 @@ async def upload_image(file: UploadFile = File(...)):
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+    
+    # 1. Run the Metadata Scan (Existing)
+    gps_info = get_gps_data(file_path)
+    
+    # 2. RUN THE AI SCAN (NEW)
+    ai_results = detect_deepfake(file_path)
 
-    real_gps = get_gps_data(file_path)
+    # 3. Generate the PDF Report (NEW)
+    report_file = generate_evidence_report(file.filename, ai_results['score'], gps_info)
+    
     return {
-        "status": "Success",
         "filename": file.filename,
-        "gps_found": real_gps is not None,
-        "coordinates": real_gps if real_gps else None,
+        "gps": gps_info,
+        "ai_results": ai_results,
+        "report_url": f"http://127.0.0.1:8000/download/{report_file}"
     }
-
 
 @app.post("/strip")
 async def strip_image(filename: str = Form(...)):

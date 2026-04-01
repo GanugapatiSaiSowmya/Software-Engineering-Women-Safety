@@ -3,3 +3,4 @@ uvicorn
 exifread
 piexif
 python-multipart
+fpdf
