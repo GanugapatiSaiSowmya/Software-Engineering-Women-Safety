@@ -43,8 +43,14 @@ export default function UploadGuard() {
     const selectedFile = e.dataTransfer?.files?.[0] || e.target.files?.[0];
     if (!selectedFile) return;
 
+    const processedBlob = await processImage(selectedFile);
+
+    const processedFile = new File([processedBlob], selectedFile.name, {
+    type: selectedFile.type,
+    });
+
     if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setFile(selectedFile);
+    setFile(processedFile);
     setPreviewUrl(URL.createObjectURL(selectedFile));
     setAnalyzing(true);
     setAnalyzed(false);
@@ -54,7 +60,7 @@ export default function UploadGuard() {
     setRealGps("");
 
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    formData.append("file", processedFile);
 
     try {
       const response = await axios.post("http://127.0.0.1:8000/upload", formData, {
