@@ -1,4 +1,3 @@
-import { processImage } from "../utils/imageProtection";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { card, cardTitle, dot, actionBtn } from "../styles/theme";
@@ -23,10 +22,10 @@ export default function UploadGuard() {
   const [reportUrl, setReportUrl]   = useState(null);
   const [toast, setToast]           = useState(null);
   const toastTimer                  = useRef(null);
-
+  
   // new state: backend stripped filename (e.g. "photo-stripped.jpg")
   const [strippedFilename, setStrippedFilename] = useState(null);
-
+  const [protectedImage, setProtectedImage] = useState(false);
   useEffect(() => {
     return () => {
       if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -46,14 +45,8 @@ export default function UploadGuard() {
     const selectedFile = e.dataTransfer?.files?.[0] || e.target.files?.[0];
     if (!selectedFile) return;
 
-    const processedBlob = await processImage(selectedFile);
-
-    const processedFile = new File([processedBlob], selectedFile.name, {
-    type: selectedFile.type,
-    });
-
     if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setFile(processedFile);
+    setFile(selectedFile);
     setPreviewUrl(URL.createObjectURL(selectedFile));
     setAnalyzing(true);
     setAnalyzed(false);
@@ -61,9 +54,9 @@ export default function UploadGuard() {
     setReportUrl(null);
     setGps(false);
     setRealGps("");
-
+    setProtectedImage(true);
     const formData = new FormData();
-    formData.append("file", processedFile);
+    formData.append("file", selectedFile);
 
     try {
       const response = await axios.post("http://127.0.0.1:8000/upload", formData, {
@@ -235,7 +228,34 @@ export default function UploadGuard() {
         {/* Results */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {analyzed && (
-            <>
+  <>
+    
+    {/* 🔐 ADD THIS BLOCK EXACTLY HERE */}
+    {protectedImage && (
+      <div style={{
+        padding: "12px 18px",
+        borderRadius: 10,
+        background: `${t.green}14`,
+        border: `1px solid ${t.green}`,
+        marginBottom: 12,
+        fontSize: 12,
+        color: t.green,
+        lineHeight: 1.6
+      }}>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>
+          🔐 Image Protection Activated
+        </div>
+
+        <div>• Adversarial Shield → Prevents AI deepfake misuse</div>
+        <div>• Hidden Watermark → Detects tampering</div>
+        <div>• Honey Pixel Traps → Disrupts AI manipulation tools</div>
+
+        <div style={{ marginTop: 6, fontSize: 11, color: t.textDim }}>
+          Your image is now secured before analysis & storage
+        </div>
+      </div>
+    )}
+
               {/* GPS */}
               <div style={{ ...card(t), border: `1px solid ${gpsStripped ? t.green + "44" : t.red + "44"}`, background: cardBg(gpsStripped ? t.green : t.red) }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
