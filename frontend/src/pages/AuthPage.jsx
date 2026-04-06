@@ -44,19 +44,22 @@ export default function AuthPage({ mode = "login", onNavigate, onLogin }) {
   };
 
   const handleSubmit = () => {
-    const err = validate();
-    if (err) { setError(err); return; }
-    setError(""); setLoading(true);
-    setTimeout(() => { setLoading(false); onLogin(); }, 1400);
-
-    console.log("Login button clicked");   
-    console.log(onLogin);    
-
-    if (email && password) {
-    onLogin();   
-  } else {
-    alert("Enter valid credentials");
+  const err = validate();
+  if (err) {
+    setError(err);
+    return;
   }
+
+  setError("");
+  setLoading(true);
+
+  setTimeout(() => {
+    setLoading(false);
+
+    localStorage.setItem("isLoggedIn", "true");
+
+    onLogin();
+  }, 1400);
   };
 
   const submitBtn = {
