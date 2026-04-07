@@ -22,10 +22,11 @@ export default function UploadGuard() {
   const [reportUrl, setReportUrl]   = useState(null);
   const [toast, setToast]           = useState(null);
   const toastTimer                  = useRef(null);
-  
+  const [slider, setSlider] = useState(50);
   // new state: backend stripped filename (e.g. "photo-stripped.jpg")
   const [strippedFilename, setStrippedFilename] = useState(null);
   const [protectedImage, setProtectedImage] = useState(false);
+  const [processedImageUrl, setProcessedImageUrl] = useState(null);
   useEffect(() => {
     return () => {
       if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -64,6 +65,9 @@ export default function UploadGuard() {
       });
 
       const data = response.data;
+      if (data.image_url) {
+        setProcessedImageUrl(data.image_url);
+      }
 
       // GPS — new response uses data.gps (string | null)
       setRealGps(data.gps || "");
@@ -255,6 +259,98 @@ export default function UploadGuard() {
         </div>
       </div>
     )}
+    {processedImageUrl && previewUrl && (
+          <div style={{
+            marginTop: 12,
+            position: "relative",
+            width: "100%",
+            maxWidth: "100%",
+            height: 220,
+            overflow: "hidden",
+            borderRadius: 10,
+            border: `1px solid ${t.borderMid}`
+          }}>
+            
+            {/* AFTER IMAGE (full) */}
+            <img
+              src={processedImageUrl}
+              alt="After"
+              style={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                objectFit: "contain"
+              }}
+            />
+
+            {/* BEFORE IMAGE (clipped) */}
+            <img
+              src={previewUrl}
+              alt="Before"
+              style={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                clipPath: `inset(0 ${100 - slider}% 0 0)`
+              }}
+            />
+
+            {/* SLIDER LINE */}
+            <div style={{
+              position: "absolute",
+              top: 0,
+              left: `${slider}%`,
+              width: 2,
+              height: "100%",
+              background: "#fff",
+              zIndex: 2
+            }} />
+
+            {/* INPUT RANGE */}
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={slider}
+              onChange={(e) => setSlider(e.target.value)}
+              style={{
+                position: "absolute",
+                width: "100%",
+                bottom: 0,
+                zIndex: 3
+              }}
+            />
+
+            {/* LABELS */}
+            <div style={{
+              position: "absolute",
+              top: 6,
+              left: 10,
+              fontSize: 10,
+              color: "#fff",
+              background: "rgba(0,0,0,0.5)",
+              padding: "2px 6px",
+              borderRadius: 4
+            }}>
+              BEFORE
+            </div>
+
+            <div style={{
+              position: "absolute",
+              top: 6,
+              right: 10,
+              fontSize: 10,
+              color: "#fff",
+              background: "rgba(0,0,0,0.5)",
+              padding: "2px 6px",
+              borderRadius: 4
+            }}>
+              AFTER
+            </div>
+
+          </div>
+        )}
 
               {/* GPS */}
               <div style={{ ...card(t), border: `1px solid ${gpsStripped ? t.green + "44" : t.red + "44"}`, background: cardBg(gpsStripped ? t.green : t.red) }}>
