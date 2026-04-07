@@ -1,4 +1,4 @@
-from image_protection import apply_adversarial_noise, embed_watermark, apply_honey_pixels
+from image_protection import protect_image
 from PIL import Image
 import os
 import shutil
@@ -41,11 +41,12 @@ async def upload_image(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     img = Image.open(file_path).convert("RGB")
-    img = apply_adversarial_noise(img)
-    img = embed_watermark(img)
-    img = apply_honey_pixels(img)
-    
-    img.save(file_path)    
+    img = Image.open(file_path).convert("RGB")
+
+    #Apply full protection pipeline (includes smart blur)
+    img = protect_image(img)
+
+    img.save(file_path)  
     
     # 1. Run the Metadata Scan (Existing)
     gps_info = get_gps_data(file_path)
