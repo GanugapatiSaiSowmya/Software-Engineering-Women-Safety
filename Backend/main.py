@@ -26,6 +26,8 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {"message": "SHIELD.ai Backend is Active", "version": "1.0.0"}
+from fastapi.staticfiles import StaticFiles
+app.mount("/", StaticFiles(directory="uploads"), name="uploads")
 
 # include auth endpoints under /auth
 # app.include_router(auth_router, prefix="/auth", tags=["auth"])
@@ -58,10 +60,11 @@ async def upload_image(file: UploadFile = File(...)):
     report_file = generate_evidence_report(file.filename, ai_results['score'], gps_info)
     
     return {
-        "filename": file.filename,
-        "gps": gps_info,
-        "ai_results": ai_results,
-        "report_url": f"http://127.0.0.1:8000/download/{report_file}"
+    "filename": file.filename,
+    "gps": gps_info,
+    "ai_results": ai_results,
+    "report_url": f"http://127.0.0.1:8000/download/{report_file}",
+    "image_url": f"http://127.0.0.1:8000/{file.filename}"
     }
 
 @app.post("/strip")
