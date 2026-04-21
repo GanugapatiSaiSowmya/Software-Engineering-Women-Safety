@@ -9,12 +9,16 @@ from fastapi.responses import FileResponse
 from metadata_agent import get_gps_data, strip_gps
 from vision_agent import detect_deepfake
 from legal_agent import generate_evidence_report
-
+from guardian_sos import router as sos_router
+from database import init_db
 
 # add auth router import
 # from auth import router as auth_router
 
 app = FastAPI()
+
+# initialize database
+init_db()
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,6 +27,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# include Guardian SOS routes
+app.include_router(sos_router)
+
+
 @app.get("/")
 def read_root():
     return {"message": "SHIELD.ai Backend is Active", "version": "1.0.0"}

@@ -1,0 +1,12 @@
+{
+    "guardians": [],
+    "sos_events": [
+        {
+            "id": "9c3f1d1a-abf7-4091-9975-f367999aea16",
+            "user_id": "user_123",
+            "timestamp": "2026-04-21 11:37:31.670615",
+            "status": "triggered"
+        }
+    ],
+    "high_alert": {}
+}
