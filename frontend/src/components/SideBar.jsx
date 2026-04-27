@@ -7,7 +7,7 @@ export default function Sidebar({ active, onNavigate }) {
 
   return (
     <nav style={{ width: 220, borderRight: `1px solid ${t.border}`, padding: "28px 0", flexShrink: 0, background: t.sidebar }}>
-      <div style={{ fontSize: 9, letterSpacing: 2.5, color: t.dark ? t.textFaint : "#2a5a80", padding: "0 24px", marginBottom: 16 }}>
+      <div style={{ fontSize: 9, letterSpacing: 2.5, color: t.textDim, padding: "0 24px", marginBottom: 16 }}>
         COMMAND CENTER
       </div>
 
@@ -29,16 +29,6 @@ export default function Sidebar({ active, onNavigate }) {
             <span style={{ fontSize: 12, color: isActive ? t.text : t.dark ? t.textDim : "#0a2a45", letterSpacing: 0.5, fontFamily: "'Courier New', monospace", flex: 1 }}>
               {item.label}
             </span>
-            {/* {!isLive && (
-              <span style={{
-                fontSize: 8, fontWeight: 700, letterSpacing: 1, padding: "2px 6px",
-                borderRadius: 3, border: `1px solid ${t.green}`,
-                color: t.green, background: `${t.green}12`,
-                boxShadow: `0 0 6px ${t.green}44`,
-                animation: "comingSoonPulse 2.5s ease-in-out infinite",
-                fontFamily: "'Courier New', monospace", whiteSpace: "nowrap",
-              }}>✦ COMING SOON</span>
-            )} */}
           </button>
         );
       })}
@@ -47,7 +37,7 @@ export default function Sidebar({ active, onNavigate }) {
       <div style={{ margin: "28px 16px 0", padding: "12px", borderRadius: 8, background: `${t.green}08`, border: `1px solid ${t.green}22` }}>
         <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
           <ShieldIcon size={14} />
-          <div style={{ fontSize: 10, color: t.dark ? t.textDim : "#0a2a45", lineHeight: 1.6 }}>
+          <div style={{ fontSize: 10, color: t.textDim, lineHeight: 1.6 }}>
             100% Local Processing.<br />No images leave your device.
           </div>
         </div>

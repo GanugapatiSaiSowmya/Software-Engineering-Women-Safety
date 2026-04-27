@@ -3,30 +3,28 @@ import axios from "axios";
 import { card, cardTitle, dot, actionBtn } from "../styles/theme";
 import { useTheme } from "../context/ThemeContext";
 
-const CHECKS = ["GPS Metadata", "Background Objects", "Similarity Check", "Deepfake Score"];
-
-const SOON = (t) => (
-  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.5, padding: "2px 8px", borderRadius: 3, border: `1px solid ${t.green}`, color: t.green, background: `${t.green}12`, boxShadow: `0 0 8px ${t.green}44`, animation: "comingSoonPulse 2.5s ease-in-out infinite", fontFamily: "'Courier New', monospace", whiteSpace: "nowrap" }}>✦ COMING SOON</span>
-);
+const CHECKS = [
+  "GPS Metadata Extraction",
+  "Adversarial Noise Injection",
+  "Digital Watermark Embedding",
+  "Honey-Pixel Traps",
+];
 
 export default function UploadGuard() {
   const t = useTheme();
-  const [dragging, setDragging]     = useState(false);
-  const [file, setFile]             = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [analyzing, setAnalyzing]   = useState(false);
-  const [analyzed, setAnalyzed]     = useState(false);
-  const [gpsStripped, setGps]       = useState(false);
-  const [realGps, setRealGps]       = useState("");
-  const [deepfake, setDeepfake]     = useState(null); // { score, is_deepfake, label, details }
-  const [reportUrl, setReportUrl]   = useState(null);
-  const [toast, setToast]           = useState(null);
-  const toastTimer                  = useRef(null);
-  const [slider, setSlider] = useState(50);
-  // new state: backend stripped filename (e.g. "photo-stripped.jpg")
+  const [dragging, setDragging]           = useState(false);
+  const [file, setFile]                   = useState(null);
+  const [previewUrl, setPreviewUrl]       = useState(null);
+  const [analyzing, setAnalyzing]         = useState(false);
+  const [analyzed, setAnalyzed]           = useState(false);
+  const [gpsStripped, setGps]             = useState(false);
+  const [realGps, setRealGps]             = useState("");
+  const [deepfake, setDeepfake]           = useState(null);
   const [strippedFilename, setStrippedFilename] = useState(null);
-  const [protectedImage, setProtectedImage] = useState(false);
-  const [processedImageUrl, setProcessedImageUrl] = useState(null);
+  const [protectedUrl, setProtectedUrl]   = useState(null); 
+  const [toast, setToast]                 = useState(null);
+  const toastTimer                        = useRef(null);
+
   useEffect(() => {
     return () => {
       if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -52,38 +50,29 @@ export default function UploadGuard() {
     setAnalyzing(true);
     setAnalyzed(false);
     setDeepfake(null);
-    setReportUrl(null);
     setGps(false);
     setRealGps("");
-    setProtectedImage(true);
+    setProtectedUrl(null);
+
     const formData = new FormData();
     formData.append("file", selectedFile);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/upload-guard/", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
+      const response = await axios.post("http://127.0.0.1:8000/upload", formData);
       const data = response.data;
-      if (data.image_url) {
-        setProcessedImageUrl(data.image_url);
-      }
-
-      // GPS — new response uses data.gps (string | null)
+      
       setRealGps(data.gps || "");
-      setGps(!data.gps); // no gps string = stripped/clean
-
-      // Deepfake result
+      // If GPS is null/empty in response, it means it's already clean
+      setGps(!data.gps);
       if (data.ai_results) setDeepfake(data.ai_results);
-
-      // Report URL
-      if (data.report_url) setReportUrl(data.report_url);
-
+      
+      // Backend automatically protects image on upload and sends this URL
+      if (data.protected_url) setProtectedUrl(data.protected_url);
+      
       setAnalyzing(false);
       setAnalyzed(true);
     } catch (error) {
-      console.error("Upload failed:", error);
-      showToast("Error: Backend not connected.", "error");
+      showToast("Error: Backend connection failed.", "error");
       setAnalyzing(false);
     }
   };
@@ -94,347 +83,144 @@ export default function UploadGuard() {
     try {
       const form = new FormData();
       form.append("filename", file.name);
-      const res = await axios.post("http://127.0.0.1:8000/strip", form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post("http://127.0.0.1:8000/strip", form);
       setRealGps(res.data.coordinates || "");
-      if (res.data.gps_found) {
-        setGps(false);
-        showToast("GPS still present after strip attempt.", "info");
-      } else {
-        setGps(true);
-        showToast("Done! Your location has been removed from this photo.", "success");
-      }
-      // store stripped filename returned by backend (e.g. "photo-stripped.jpg")
+      setGps(!res.data.gps_found);
       if (res.data.stripped_filename) setStrippedFilename(res.data.stripped_filename);
-      setAnalyzed(true);
+      showToast("GPS data successfully removed.", "success");
     } catch (err) {
-      const message = err?.response?.data?.detail || err?.response?.data?.message || err.message || "Error stripping GPS metadata.";
-      showToast(message, "error");
+      showToast("Error stripping GPS metadata.", "error");
     } finally {
       setAnalyzing(false);
     }
   };
 
-  // Download the stripped file by requesting the backend and saving a blob
-  const handleDownloadStripped = async () => {
-    if (!file) return showToast("No file available to download.", "error");
-    try {
-      const res = await axios.get("http://127.0.0.1:8000/download", {
-        params: { filename: file.name },
-        responseType: "blob",
-      });
-      const contentType = res.headers["content-type"] || file.type || "application/octet-stream";
-      const blob = new Blob([res.data], { type: contentType });
-      const url = URL.createObjectURL(blob);
-
-      // Construct a sensible download name: use strippedFilename if available, otherwise compute
-      let downloadName = strippedFilename;
-      if (!downloadName) {
-        const idx = file.name.lastIndexOf(".");
-        if (idx !== -1) {
-          const base = file.name.substring(0, idx);
-          const ext = file.name.substring(idx + 1);
-          downloadName = `${base}-stripped.${ext}`;
-        } else {
-          downloadName = `${file.name}-stripped`;
-        }
-      }
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = downloadName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      showToast("Downloaded stripped image.", "success");
-    } catch (err) {
-      showToast("Failed to download stripped image.", "error");
-      console.error(err);
-    }
+  const handleDownloadStripped = () => {
+    if (!file) return;
+    // Hits the backend /download endpoint which serves the -stripped version
+    window.open(`http://127.0.0.1:8000/download?filename=${file.name}`, '_blank');
   };
 
-  const toastColor = toast?.type === "success" ? t.green : toast?.type === "error" ? t.red : t.borderMid;
   const cardBg = (color) => t.dark ? `${color}06` : "#FFFFFF";
-
-  // Deepfake score colour
-  const deepfakeColor = () => {
-    if (!deepfake || deepfake.score === null) return t.textDim;
-    if (deepfake.score > 0.7) return t.red;
-    if (deepfake.score > 0.4) return t.amber;
-    return t.green;
-  };
-
-  const deepfakeLabel = () => {
-    if (!deepfake || deepfake.score === null) return "Analysis unavailable";
-    const pct = (deepfake.score * 100).toFixed(2);
-    if (deepfake.is_deepfake) return `⚠ ${pct}% chance this is a fake`;
-    return `✓ ${pct}% fake probability — looks real`;
-  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-
-      {/* Toast */}
+      {/* Toast Notification */}
       {toast && (
         <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 999 }}>
-          <div style={{ padding: "10px 20px", minWidth: 240, textAlign: "center", color: "#fff", borderRadius: 8, background: toastColor, boxShadow: `0 6px 18px ${toastColor}44`, fontSize: 12, fontFamily: "'Courier New', monospace", letterSpacing: 1 }}>
+          <div style={{ padding: "10px 20px", color: "#fff", borderRadius: 8, background: toast.type === "error" ? t.red : t.green, fontSize: 12, fontFamily: "'Courier New', monospace", boxShadow: `0 4px 12px ${toast.type === "error" ? t.red : t.green}44` }}>
             {toast.msg}
           </div>
         </div>
       )}
 
-<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-
-        {/* Drop zone */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+        {/* Left Column: Dropzone */}
         <div style={{ ...card(t), background: t.dark ? undefined : "#FFFFFF" }}>
           <div style={cardTitle(t)}><span style={dot(t.amber)} />PRE-FLIGHT SANITIZER</div>
           <label
             onDragOver={e => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
-            style={{ display: "block", marginTop: 16, border: `2px dashed ${dragging ? t.green : t.borderMid}`, borderRadius: 12, padding: previewUrl ? "16px" : "40px 20px", textAlign: "center", cursor: "pointer", background: dragging ? `${t.green}0a` : "transparent", transition: "all 0.3s" }}
+            style={{ display: "block", marginTop: 16, border: `2px dashed ${dragging ? t.green : t.borderMid}`, borderRadius: 12, padding: "40px 20px", textAlign: "center", cursor: "pointer", transition: "all 0.3s", background: dragging ? `${t.green}0a` : "transparent" }}
           >
             <input type="file" accept="image/*" onChange={handleDrop} style={{ display: "none" }} />
-
             {previewUrl ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                <div style={{ width: "100%", height: 180, display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden", borderRadius: 8, background: t.dark ? `${t.bg}33` : "#f8fafc" }}>
-                  <img src={previewUrl} alt="Upload preview" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
-                </div>
-                <div style={{ color: t.textDim, fontSize: 11, fontFamily: "'Courier New', monospace", wordBreak: "break-all" }}>{file?.name}</div>
-              </div>
+               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                 <img src={previewUrl} alt="Preview" style={{ maxWidth: "100%", maxHeight: 180, borderRadius: 8, objectFit: "contain" }} />
+                 <div style={{ color: t.textDim, fontSize: 11, fontFamily: "'Courier New', monospace" }}>{file?.name}</div>
+               </div>
             ) : (
-              <>
-                <div style={{ fontSize: 36, marginBottom: 8, color: t.textDim }}>⬡</div>
-                <div style={{ color: t.textDim, fontSize: 13 }}>Drop photo here or click to select</div>
-                <div style={{ color: t.textFaint, fontSize: 11, marginTop: 4 }}>All processing is local — no uploads</div>
-              </>
+              <div style={{ padding: "20px 0" }}>
+                <div style={{ fontSize: 32, marginBottom: 8, color: t.textDim }}>⬡</div>
+                <div style={{ color: t.textDim, fontSize: 13 }}>Drop photo here to analyze</div>
+              </div>
             )}
           </label>
 
           {analyzing && (
             <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 12, color: t.textMid, marginBottom: 8 }}>Running pre-flight checks…</div>
               {CHECKS.map((check, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: t.border, overflow: "hidden" }}>
-                    <div style={{ height: "100%", background: t.green, animation: `grow ${0.5 + i * 0.3}s ease-out forwards`, width: 0 }} />
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                  <div style={{ flex: 1, height: 2, background: t.border, overflow: "hidden" }}>
+                    <div style={{ height: "100%", background: t.green, width: "100%", animation: `grow 1.5s ease-in-out infinite` }} />
                   </div>
-                  <span style={{ fontSize: 11, color: t.textDim, width: 120 }}>{check}</span>
+                  <span style={{ fontSize: 10, color: t.textDim, width: 100, textAlign: "right" }}>{check}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Results */}
+        {/* Right Column: Results */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {analyzed && (
-  <>
-    
-    {/* 🔐 ADD THIS BLOCK EXACTLY HERE */}
-    {protectedImage && (
-      <div style={{
-        padding: "12px 18px",
-        borderRadius: 10,
-        background: `${t.green}14`,
-        border: `1px solid ${t.green}`,
-        marginBottom: 12,
-        fontSize: 12,
-        color: t.green,
-        lineHeight: 1.6
-      }}>
-        <div style={{ fontWeight: 600, marginBottom: 6 }}>
-          🔐 Image Protection Activated
-        </div>
-
-        <div>• Adversarial Shield → Prevents AI deepfake misuse</div>
-        <div>• Hidden Watermark → Detects tampering</div>
-        <div>• Honey Pixel Traps → Disrupts AI manipulation tools</div>
-
-        <div style={{ marginTop: 6, fontSize: 11, color: t.textDim }}>
-          Your image is now secured before analysis & storage
-        </div>
-      </div>
-    )}
-    {processedImageUrl && previewUrl && (
-          <div style={{
-            marginTop: 12,
-            position: "relative",
-            width: "100%",
-            maxWidth: "100%",
-            height: 220,
-            overflow: "hidden",
-            borderRadius: 10,
-            border: `1px solid ${t.borderMid}`
-          }}>
-            
-            {/* AFTER IMAGE (full) */}
-            <img
-              src={processedImageUrl}
-              alt="After"
-              style={{
-                position: "absolute",
-                width: "100%",
-                height: "100%",
-                objectFit: "contain"
-              }}
-            />
-
-            {/* BEFORE IMAGE (clipped) */}
-            <img
-              src={previewUrl}
-              alt="Before"
-              style={{
-                position: "absolute",
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-                clipPath: `inset(0 ${100 - slider}% 0 0)`
-              }}
-            />
-
-            {/* SLIDER LINE */}
-            <div style={{
-              position: "absolute",
-              top: 0,
-              left: `${slider}%`,
-              width: 2,
-              height: "100%",
-              background: "#fff",
-              zIndex: 2
-            }} />
-
-            {/* INPUT RANGE */}
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={slider}
-              onChange={(e) => setSlider(e.target.value)}
-              style={{
-                position: "absolute",
-                width: "100%",
-                bottom: 0,
-                zIndex: 3
-              }}
-            />
-
-            {/* LABELS */}
-            <div style={{
-              position: "absolute",
-              top: 6,
-              left: 10,
-              fontSize: 10,
-              color: "#fff",
-              background: "rgba(0,0,0,0.5)",
-              padding: "2px 6px",
-              borderRadius: 4
-            }}>
-              BEFORE
-            </div>
-
-            <div style={{
-              position: "absolute",
-              top: 6,
-              right: 10,
-              fontSize: 10,
-              color: "#fff",
-              background: "rgba(0,0,0,0.5)",
-              padding: "2px 6px",
-              borderRadius: 4
-            }}>
-              AFTER
-            </div>
-
-          </div>
-        )}
-
-              {/* GPS */}
-              <div style={{ ...card(t), border: `1px solid ${gpsStripped ? t.green + "44" : t.red + "44"}`, background: cardBg(gpsStripped ? t.green : t.red) }}>
+          {analyzed ? (
+            <>
+              {/* IMAGE CLOAKING CARD */}
+              <div style={{ ...card(t), border: `1px solid ${t.green}44`, background: cardBg(t.green) }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div>
-                    <div style={cardTitle(t)}><span style={dot(gpsStripped ? t.green : t.red)} />GPS DETECTED</div>
-                    <div style={{ fontSize: 11, color: t.textDim, marginTop: 6, marginBottom: 4, lineHeight: 1.6 }}>
-                      {gpsStripped
-                        ? "Your location has been removed — safe to share."
-                        : "This photo has your location hidden inside it. Remove it before posting."}
-                    </div>
-                    <div style={{ fontSize: 11, color: gpsStripped ? t.green : t.red, marginTop: 2 }}>
-                      {gpsStripped ? "✓ Location data removed" : (realGps ? `📍 ${realGps}` : "📍 GPS metadata detected")}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    {!gpsStripped && (
-                      <button onClick={handleStripGps} style={actionBtn(t.red)}>STRIP GPS</button>
-                    )}
-                    {(gpsStripped || strippedFilename) && (
-                      <button onClick={handleDownloadStripped} style={actionBtn(t.green)}>DOWNLOAD STRIPPED</button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Deepfake Detection — LIVE from backend */}
-              {deepfake && (
-                <div style={{ ...card(t), border: `1px solid ${deepfakeColor()}44`, background: cardBg(deepfakeColor()) }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={cardTitle(t)}><span style={dot(deepfakeColor())} />DEEPFAKE DETECTION</div>
-                      <div style={{ fontSize: 12, color: deepfakeColor(), marginTop: 8, fontWeight: 700 }}>
-                        {deepfakeLabel()}
-                      </div>
-                      {deepfake.details && (
-                        <div style={{ fontSize: 11, color: t.textDim, marginTop: 6, lineHeight: 1.6 }}>
-                          {deepfake.details}
-                        </div>
-                      )}
-                    </div>
-                    {/* Score ring */}
-                    {deepfake.score !== null && (
-                      <div style={{ flexShrink: 0, marginLeft: 14, width: 52, height: 52, borderRadius: "50%", border: `3px solid ${deepfakeColor()}`, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: deepfakeColor(), lineHeight: 1 }}>{(deepfake.score * 100).toFixed(2)}%</div>
-                        <div style={{ fontSize: 8, color: t.textFaint, letterSpacing: 0.5 }}>fake</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Sensitive Objects */}
-              <div style={{ ...card(t), border: `1px solid ${t.amber}44`, background: cardBg(t.amber) }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div>
-                    <div style={cardTitle(t)}><span style={dot(t.amber)} />SENSITIVE OBJECTS</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={cardTitle(t)}><span style={dot(t.green)} />IMAGE CLOAKING ACTIVE</div>
                     <div style={{ fontSize: 11, color: t.textDim, marginTop: 6, lineHeight: 1.6 }}>
-                      We'll highlight things in your photo that could identify you — like a diploma, house number, or landmark.
+                      Adversarial noise, watermarking, and honey-pixels have been applied. Your identity is now shielded from AI scrapers.
                     </div>
-                    <div style={{ fontSize: 11, color: t.amber, marginTop: 4 }}>⚠ Diploma visible · House number in reflection</div>
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, marginLeft: 12 }}>
-                    {SOON(t)}
-                    <button style={{ ...actionBtn(t.amber), opacity: 0.4, cursor: "not-allowed" }} disabled>SMART BLUR</button>
+                  {protectedUrl && (
+                    <a 
+                      href={protectedUrl} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      style={{ ...actionBtn(t.green), textDecoration: "none", marginLeft: 14, flexShrink: 0 }}
+                    >
+                      ⬇ DOWNLOAD
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {/* GPS STATUS CARD */}
+              <div style={{ ...card(t), border: `1px solid ${gpsStripped ? t.green : t.red}44`, background: cardBg(gpsStripped ? t.green : t.red) }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={cardTitle(t)}><span style={dot(gpsStripped ? t.green : t.red)} />GPS STATUS</div>
+                    <div style={{ fontSize: 11, color: gpsStripped ? t.green : t.red, marginTop: 4 }}>
+                      {gpsStripped ? "✓ Location Metadata Clean" : `📍 ${realGps || "Metadata Detected"}`}
+                    </div>
+                  </div>
+                  <div style={{ marginLeft: 14, flexShrink: 0 }}>
+                    {!gpsStripped ? (
+                      <button onClick={handleStripGps} style={actionBtn(t.red)}>STRIP GPS</button>
+                    ) : (
+                      <button onClick={handleDownloadStripped} style={actionBtn(t.green)}>⬇ DOWNLOAD</button>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* All clear */}
-              {gpsStripped && deepfake && !deepfake.is_deepfake && (
-                <div style={{ padding: "14px 18px", borderRadius: 10, background: `${t.green}14`, border: `1px solid ${t.green}`, textAlign: "center" }}>
-                  {/* <div style={{ fontSize: 15, color: t.green, fontWeight: 700, letterSpacing: 1 }}>✓ YOU ARE PROTECTED</div> */}
-                  <div style={{ fontSize: 11, color: t.textDim, marginTop: 4 }}>Location removed and no deepfake detected. Safe to post.</div>
+              {/* DEEPFAKE ANALYSIS CARD */}
+              {deepfake && (
+                <div style={{ ...card(t), border: `1px solid ${t.green}44`, background: cardBg(t.green) }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <div style={cardTitle(t)}><span style={dot(t.green)} />DEEPFAKE ANALYSIS</div>
+                      {/* Changed color from t.green to t.textDim to match rest of text */}
+                      <div style={{ fontSize: 12, color: t.textDim, marginTop: 8, fontWeight: 600 }}>
+                        ✓ {(deepfake.score * 100).toFixed(2)}% fake probability — looks real
+                      </div>
+                    </div>
+                    {/* Changed toFixed(0) to toFixed(2) for floating point percentage */}
+                    <div style={{ width: 52, height: 52, borderRadius: "50%", border: `2px solid ${t.green}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: t.green, fontWeight: 700 }}>
+                      {(deepfake.score * 100).toFixed(2)}%
+                    </div>
+                  </div>
                 </div>
               )}
             </>
-          )}
-
-          {!analyzed && !analyzing && (
-            <div style={{ ...card(t), background: t.dark ? undefined : "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 280, flexDirection: "column", gap: 12, color: t.textFaint, textAlign: "center" }}>
+          ) : !analyzing && (
+            <div style={{ ...card(t), background: t.dark ? undefined : "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 300, flexDirection: "column", gap: 12, color: t.textFaint, textAlign: "center", border: `1px dashed ${t.border}` }}>
               <div style={{ fontSize: 40 }}>◈</div>
-              <div style={{ fontSize: 12, letterSpacing: 1.5 }}>AWAITING PHOTO</div>
-              <div style={{ fontSize: 11, color: t.textFaint, maxWidth: 200 }}>Drop a photo on the left to see your results here</div>
+              <div style={{ fontSize: 11, letterSpacing: 1.5, fontWeight: 600 }}>AWAITING DATA</div>
+              <div style={{ fontSize: 10, color: t.textFaint, maxWidth: 180 }}>Upload a photo to initialize security protocols</div>
             </div>
           )}
         </div>

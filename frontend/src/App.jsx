@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import Landing       from "./pages/Landing";
 import AuthPage      from "./pages/AuthPage";
+import FaceVerify    from "./pages/FaceVerify";
 import Header        from "./components/Header";
 import Sidebar       from "./components/Sidebar";
 import IdentityVault from "./modules/IdentityVault";
@@ -29,9 +30,7 @@ const PAGE_SUBTITLES = {
 
 function Dashboard({ onLogout }) {
   const t = useTheme();
-  const [active, setActive] = useState(
-  localStorage.getItem("activeModule") || "vault"
-  );
+  const [active, setActive] = useState("vault");
   const ActiveModule = MODULES[active];
   const currentNav   = NAV_ITEMS.find(n => n.id === active);
 
@@ -57,13 +56,7 @@ function Dashboard({ onLogout }) {
       <Header onLogout={onLogout} />
 
       <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", minHeight: "calc(100vh - 60px)" }}>
-        <Sidebar
-          active={active}
-          onNavigate={(module) => {
-            setActive(module);
-            localStorage.setItem("activeModule", module);
-          }}
-        />
+        <Sidebar active={active} onNavigate={setActive} />
         <main style={{ flex: 1, padding: "32px", overflowY: "auto" }}>
           <div style={{ marginBottom: 24 }}>
             <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: 1, color: t.text }}>
@@ -80,21 +73,19 @@ function Dashboard({ onLogout }) {
 }
 
 function AppRoutes() {
-  const [page, setPage] = useState(
-  localStorage.getItem("isLoggedIn") === "true" ? "dashboard" : "landing"
-  );
-  const handleLogin = () => {
-  localStorage.setItem("isLoggedIn", "true");
-  setPage("dashboard");
+  // page: "landing" | "login" | "register" | "verify" | "dashboard"
+  const [page, setPage] = useState("landing");
+
+  const handleLoginSuccess = () => setPage("verify");   // go to face verify after login
+  const handleVerified     = () => setPage("dashboard"); // go to dashboard after face verify
+  const handleLogout       = () => {
+    setPage("landing");
   };
-  const handleLogout = () => {
-  localStorage.removeItem("isLoggedIn");
-  localStorage.removeItem("activeModule");
-  setPage("landing");
-  };
+
   if (page === "landing")   return <Landing onNavigate={setPage} />;
-  if (page === "login")     return <AuthPage mode="login"    onNavigate={setPage} onLogin={handleLogin} />;
-  if (page === "register")  return <AuthPage mode="register" onNavigate={setPage} onLogin={handleLogin} />;
+  if (page === "login")     return <AuthPage mode="login"    onNavigate={setPage} onLogin={handleLoginSuccess} />;
+  if (page === "register")  return <AuthPage mode="register" onNavigate={setPage} onLogin={handleLoginSuccess} />;
+  if (page === "verify")    return <FaceVerify onVerified={handleVerified} onLogout={handleLogout} />;
   if (page === "dashboard") return <Dashboard onLogout={handleLogout} />;
   return null;
 }

@@ -1,6 +1,12 @@
 fastapi
 uvicorn
-exifread
+sqlalchemy
+psycopg2-binary
+passlib[bcrypt]
+python-jose[cryptography]
+python-dotenv
+pillow
 piexif
+transformers
+torch
 python-multipart
-fpdf

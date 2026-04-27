@@ -49,7 +49,7 @@ export default function Header({ onLogout }) {
 
           {/* Logout */}
           {onLogout && (
-            <button onClick={onLogout} style={{ background: "transparent", border: `1px solid ${t.borderMid}`, color: t.textDim, fontSize: 10, letterSpacing: 1.5, padding: "5px 12px", borderRadius: 4, cursor: "pointer", fontFamily: "'Courier New', monospace" }}>
+            <button onClick={onLogout} style={{ background: "transparent", border: `1px solid ${t.borderMid}`, color: "#dcd4d4", fontSize: 10, letterSpacing: 1.5, padding: "5px 12px", borderRadius: 4, cursor: "pointer", fontFamily: "'Courier New', monospace" }}>
               LOGOUT
             </button>
           )}

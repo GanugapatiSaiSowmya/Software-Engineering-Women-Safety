@@ -1,21 +1,20 @@
-import json
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 import os
 
-DB_FILE = "sos_db.json"
+load_dotenv()
 
-def init_db():
-    if not os.path.exists(DB_FILE):
-        with open(DB_FILE, "w") as f:
-            json.dump({
-                "guardians": [],
-                "sos_events": [],
-                "high_alert": {}
-            }, f)
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:shield123@localhost:5432/shieldai")
 
-def read_db():
-    with open(DB_FILE, "r") as f:
-        return json.load(f)
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
 
-def write_db(data):
-    with open(DB_FILE, "w") as f:
-        json.dump(data, f, indent=4)
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

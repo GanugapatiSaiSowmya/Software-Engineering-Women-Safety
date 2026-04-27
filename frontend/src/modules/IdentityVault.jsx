@@ -216,7 +216,7 @@ function CameraScanner({ onEnrolled, t }) {
       )}
 
       {/* Hint */}
-      <div style={{ fontSize: 10, color: t.textFaint, textAlign: "center", maxWidth: 200, lineHeight: 1.6 }}>
+      <div style={{ fontSize: 10, color: "#ffffff", textAlign: "center", maxWidth: 200, lineHeight: 1.6 }}>
         {phase === "idle"     && "No photo is saved. We only create a secure code from your face."}
         {phase === "live"     && "Centre your face in the frame, then tap Scan My Face."}
         {phase === "scanning" && "Hold still — creating your secure face code."}
@@ -307,7 +307,7 @@ function AliasManager({ t }) {
           </div>
         </div>
       ) : (
-        <button onClick={() => setAdding(true)} style={{ padding: "10px", borderRadius: 8, border: `1px dashed ${t.borderMid}`, background: "transparent", color: t.textDim, fontSize: 11, cursor: "pointer", fontFamily: "'Courier New', monospace" }}>
+        <button onClick={() => setAdding(true)} style={{ padding: "10px", borderRadius: 8, border: `1px dashed ${t.borderMid}`, background: "transparent", color: "#ffffff", fontSize: 11, cursor: "pointer", fontFamily: "'Courier New', monospace" }}>
           + Connect another account
         </button>
       )}
@@ -339,9 +339,9 @@ export default function IdentityVault() {
 
         {/* Left — Camera + Encryption */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={card(t)}>
-            <div style={cardTitle(t)}><span style={dot(enrolled ? t.green : t.amber)} />BIOMETRIC ENROLLMENT</div>
-            <div style={{ fontSize: 11, color: t.textDim, marginTop: 6, marginBottom: 20, lineHeight: 1.6 }}>
+          <div style={{ ...card(t), background: "#0a1628" }}>
+            <div style={{ ...cardTitle(t), color: "#ffffff" }}><span style={dot(enrolled ? t.green : t.amber)} />BIOMETRIC ENROLLMENT</div>
+            <div style={{ fontSize: 11, color: "#dcd4d4", marginTop: 6, marginBottom: 20, lineHeight: 1.6 }}>
               {enrolled
                 ? "Your face is enrolled. We'll use this to detect if your photo appears online without your permission."
                 : "Open your camera below and scan your face. No photo is saved — we only create a secure code."}
@@ -370,9 +370,9 @@ export default function IdentityVault() {
         </div>
 
         {/* Right — Alias Manager */}
-        <div style={card(t)}>
-          <div style={cardTitle(t)}><span style={dot(t.purple)} />ALIAS MANAGEMENT</div>
-          <div style={{ fontSize: 11, color: t.textDim, marginTop: 6, marginBottom: 16, lineHeight: 1.6 }}>
+        <div style={{ ...card(t), background: "#0a1628" }}>
+          <div style={{ ...cardTitle(t), color: "#ffffff" }}><span style={dot(t.purple)} />ALIAS MANAGEMENT</div>
+          <div style={{ fontSize: 11, color: "#dcd4d4", marginTop: 6, marginBottom: 16, lineHeight: 1.6 }}>
             These are the accounts we'll monitor for you. A <span style={{ color: t.green }}>green dot</span> means we're actively watching it. Tap a status dot to pause. Hit <b>×</b> to remove.
           </div>
           <AliasManager t={t} />
