@@ -29,8 +29,8 @@ export default function Takedown() {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
       
-      <div style={{ ...card(t), background: "#0a1628" }}>
-        <div style={{ ...cardTitle(t), color: "#ffffff" }}>
+      <div style={{ ...card(t)}}>
+        <div style={{ ...cardTitle(t), color: t.textDim}}>
           <span style={dot(t.red)} />
           EVIDENCE BUNDLE GENERATOR
         </div>
@@ -59,7 +59,7 @@ export default function Takedown() {
               {/* ✅ TEXT COLOR FIXED HERE */}
               <div style={{
                 fontSize: 12,
-                color: "#ffffff",
+                color: t.textDim,
                 transition: "color 0.4s"
               }}>
                 {s.label}
@@ -73,7 +73,7 @@ export default function Takedown() {
               display: "flex",
               justifyContent: "space-between",
               fontSize: 11,
-              color: "#ffffff",
+              color: t.textDim,
               marginBottom: 6
             }}>
               <span>Building bundle…</span>
@@ -128,8 +128,8 @@ export default function Takedown() {
         </div>
       </div>
 
-      <div style={{ ...card(t), background: "#0a1628" }}>
-        <div style={{ ...cardTitle(t), color: "#ffffff" }}>
+      <div style={{ ...card(t)}}>
+        <div style={{ ...cardTitle(t), color: t.textDim }}>
           <span style={dot(t.amber)} />
           CASE TRACKER
         </div>

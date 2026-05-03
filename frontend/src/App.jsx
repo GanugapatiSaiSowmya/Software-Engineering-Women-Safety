@@ -5,7 +5,6 @@ import AuthPage      from "./pages/AuthPage";
 import FaceVerify    from "./pages/FaceVerify";
 import Header        from "./components/Header";
 import Sidebar       from "./components/Sidebar";
-import IdentityVault from "./modules/IdentityVault";
 import UploadGuard   from "./modules/UploadGuard";
 import SafetyAudit   from "./modules/SafetyAudit";
 import Takedown      from "./modules/Takedown";
@@ -13,7 +12,6 @@ import GuardianSOS   from "./modules/GuardianSOS";
 import { NAV_ITEMS } from "./utils/data";
 
 const MODULES = {
-  vault:    IdentityVault,
   guard:    UploadGuard,
   audit:    SafetyAudit,
   takedown: Takedown,
@@ -21,7 +19,6 @@ const MODULES = {
 };
 
 const PAGE_SUBTITLES = {
-  vault:    "Keep your face and accounts safe",
   guard:    "Check a photo before you post it",
   audit:    "See what's happening with your photos online",
   takedown: "Take down fake content and build your case",
@@ -30,7 +27,7 @@ const PAGE_SUBTITLES = {
 
 function Dashboard({ onLogout }) {
   const t = useTheme();
-  const [active, setActive] = useState("vault");
+  const [active, setActive] = useState("guard");
   const ActiveModule = MODULES[active];
   const currentNav   = NAV_ITEMS.find(n => n.id === active);
 

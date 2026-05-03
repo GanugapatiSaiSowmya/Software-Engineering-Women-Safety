@@ -113,9 +113,9 @@ export default function GuardianSOS() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
 
         {/* Trusted Circle */}
-        <div style={{ ...card(t), background: "#0a1628" }}>
-          <div style={{ ...cardTitle(t) , color: "#ffffff" }}><span style={dot(t.purple)} />TRUSTED CIRCLE</div>
-          <div style={{ fontSize: 11, color: "#dcd4d4", marginTop: 6, marginBottom: 14, lineHeight: 1.6 }}>
+        <div style={{ ...card(t) }}>
+          <div style={{ ...cardTitle(t) , color: t.textDim }}><span style={dot(t.purple)} />TRUSTED CIRCLE</div>
+          <div style={{ fontSize: 11, color: t.textDim, marginTop: 6, marginBottom: 14, lineHeight: 1.6 }}>
             These people will be contacted if you send an emergency alert.
           </div>
           {/* Guardian list */}
@@ -164,7 +164,7 @@ export default function GuardianSOS() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-          {/* Live Location Map */}
+          {/* Live Location Map
           <div style={{ ...card(t), background: "#0a1628" }}>
             <div style={{ ...cardTitle(t), color: "#ffffff" }}><span style={dot(highAlert ? t.green : t.textFaint)} />LIVE LOCATION BROADCAST</div>
             <div style={{ fontSize: 11, color: "#dcd4d4", marginTop: 6, marginBottom: 12, lineHeight: 1.6 }}>
@@ -180,10 +180,10 @@ export default function GuardianSOS() {
               {!highAlert && <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: t.textFaint, fontSize: 11, letterSpacing: 1 }}>Standby</div>}
             </div>
             {highAlert && <div style={{ marginTop: 10, fontSize: 11, color: t.green, fontFamily: "monospace" }}>📍 Location sharing active · {guardians.length} guardian(s) notified</div>}
-          </div>
+          </div> */}
 
           {/* Help Resources */}
-          <div style={{ ...card(t), background: "#0a1628" }}>
+          {/* <div style={{ ...card(t), background: "#0a1628" }}>
             <div style={{ ...cardTitle(t), color: "#ffffff" }}><span style={dot(t.amber)} />NEED MORE HELP?</div>
             <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
               {[
@@ -197,7 +197,7 @@ export default function GuardianSOS() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
