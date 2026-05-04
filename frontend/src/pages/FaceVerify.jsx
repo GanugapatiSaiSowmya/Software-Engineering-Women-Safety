@@ -164,7 +164,7 @@ export default function FaceVerify({ onVerified, onLogout }) {
   const videoRef  = useRef(null);
   const streamRef = useRef(null);
 
-  const token = localStorage.getItem("shield_token");
+  const token = localStorage.getItem("token");
 
   const [faceEnrolled, setFaceEnrolled] = useState(null);
   const [phase, setPhase]               = useState("loading");
