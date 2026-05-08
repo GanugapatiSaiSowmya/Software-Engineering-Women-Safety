@@ -8,19 +8,19 @@ export function ThemeProvider({ children }) {
 
   const t = dark ? {
     dark,
-    bg:         "#060d1b",
+    bg:         "#061228",
     bgCard:     "rgba(255,255,255,0.02)",
     bgCardHover:"rgba(255,255,255,0.04)",
-    border:     "#0f172a",
-    borderMid:  "#1e293b",
+    border:     "#065f46",
+    borderMid:  "#10b981",
     text:       "#e2e8f0",
     textMid:    "#94a3b8",
-    textDim:    "#475569",
-    textFaint:  "#334155",
-    sidebar:    "rgba(6,13,27,0.95)",
-    header:     "rgba(6,13,27,0.9)",
+    textDim:    "#d9dde4",
+    textFaint:  "#d4dce6",
+    sidebar:    "#061228",
+    header:     "#061228",
     input:      "#0a1628",
-    green:      "#10b981",
+    green:      "#1ade7e",
     amber:      "#f59e0b",
     red:        "#ef4444",
     purple:     "#818cf8",
@@ -32,15 +32,15 @@ export function ThemeProvider({ children }) {
     bgCardHover: "#f4f9ff",
     border:      "#b8d8f8",
     borderMid:   "#8ec4f0",
-    text:        "#0a1e35",
-    textMid:     "#1e4060",
-    textDim:     "#5a8ab0",
-    textFaint:   "#7aaad0",
+    text:        "#051425",
+    textMid:     "#071c2f",
+    textDim:     "#2b597e",
+    textFaint:   "#3d7fb6",
     sidebar:     "#ffffff",
     header:      "rgba(255,255,255,0.95)",
     input:       "#f4faff",
     // Universal traffic light
-    green:       "#16a34a",   // ✅ safe / live / protected
+    green:       "#22c55e",   // ✅ safe / live / protected
     amber:       "#d97706",   // ⚠️ caution / warning
     red:         "#dc2626",   // 🔴 danger / high risk
     purple:      "#4f46e5",   // 🔵 info / analysis

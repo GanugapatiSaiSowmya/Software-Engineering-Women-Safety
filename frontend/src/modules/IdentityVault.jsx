@@ -109,7 +109,7 @@ function CameraScanner({ onEnrolled, t }) {
         {(phase === "scanning" || phase === "done") && (
           <div style={{
             position: "absolute", inset: -16, borderRadius: "50%",
-            border: `1px solid ${t.green}18`,
+            border: `1px solid ${t.green}`,
             animation: "pulse 2s ease-in-out infinite 0.4s",
           }} />
         )}

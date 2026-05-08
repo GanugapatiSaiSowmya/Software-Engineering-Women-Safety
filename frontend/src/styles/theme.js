@@ -2,7 +2,7 @@
 
 export const card = (t) => ({
   background: t.bgCard,
-  border: `1px solid ${t.border}`,
+  border: `1px solid ${t.green}`,
   borderRadius: 12,
   padding: "20px 22px",
 });

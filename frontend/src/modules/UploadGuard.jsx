@@ -153,7 +153,7 @@ export default function UploadGuard() {
           {analyzed ? (
             <>
               {/* ── Merged: GPS Strip + Image Cloaking ── */}
-              <div style={{ ...card(t), border: `1px solid ${t.green}44`, background: cardBg(t.green) }}>
+              <div style={{ ...card(t), border: `1px solid ${t.green}`, background: cardBg(t.green) }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                   <div style={{ flex: 1 }}>
                     <div style={cardTitle(t)}><span style={dot(t.green)} />PHOTO PROTECTION </div>
@@ -185,7 +185,7 @@ export default function UploadGuard() {
 
               {/* ── Deepfake Analysis ── */}
               {deepfake && (
-                <div style={{ ...card(t), border: `1px solid ${deepfakeColor()}44`, background: cardBg(deepfakeColor()) }}>
+                <div style={{ ...card(t), border: `1px solid ${deepfakeColor()}`, background: cardBg(deepfakeColor()) }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ flex: 1 }}>
                       <div style={cardTitle(t)}><span style={dot(deepfakeColor())} />DEEPFAKE ANALYSIS</div>

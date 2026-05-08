@@ -6,7 +6,7 @@ export default function Sidebar({ active, onNavigate }) {
   const t = useTheme();
 
   return (
-    <nav style={{ width: 220, borderRight: `1px solid ${t.border}`, padding: "28px 0", flexShrink: 0, background: t.sidebar }}>
+    <nav style={{ width: 220, borderRight: `1px solid ${t.green}`, padding: "28px 0", flexShrink: 0, background: t.sidebar, boxShadow: `inset -8px 0 12px ${t.green}08` }}>
       <div style={{ fontSize: 9, letterSpacing: 2.5, color: t.textDim, padding: "0 24px", marginBottom: 16 }}>
         COMMAND CENTER
       </div>

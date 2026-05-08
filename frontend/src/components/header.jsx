@@ -14,10 +14,11 @@ export default function Header({ onLogout }) {
 
   return (
     <header style={{
-      borderBottom: `1px solid ${t.border}`,
+      borderBottom: `1px solid ${t.green}`,
       background: t.header,
       backdropFilter: "blur(12px)",
       position: "sticky", top: 0, zIndex: 100, padding: "0 32px",
+      boxShadow: `0 4px 12px ${t.green}08`,
     }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", height: 60 }}>
         {/* Logo */}

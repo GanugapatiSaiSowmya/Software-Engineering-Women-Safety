@@ -9,6 +9,7 @@ import UploadGuard   from "./modules/UploadGuard";
 import SafetyAudit   from "./modules/SafetyAudit";
 import Takedown      from "./modules/Takedown";
 import GuardianSOS   from "./modules/GuardianSOS";
+import SupportHub    from "./modules/SupportHub";
 import { NAV_ITEMS } from "./utils/data";
 
 const MODULES = {
@@ -16,6 +17,7 @@ const MODULES = {
   audit:    SafetyAudit,
   takedown: Takedown,
   sos:      GuardianSOS,
+  support:  SupportHub,
 };
 
 const PAGE_SUBTITLES = {
@@ -23,6 +25,7 @@ const PAGE_SUBTITLES = {
   audit:    "See what's happening with your photos online",
   takedown: "Take down fake content and build your case",
   sos:      "Alert your trusted people if you need help",
+  support:  "Learn, get help, and access resources",
 };
 
 function Dashboard({ onLogout }) {

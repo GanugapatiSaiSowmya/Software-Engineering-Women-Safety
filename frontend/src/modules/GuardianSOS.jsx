@@ -127,7 +127,7 @@ export default function GuardianSOS() {
     fontSize: 12,
     background: t.input,
     color: t.text,
-    border: `1px solid ${t.borderMid}`,
+    border: `1px solid ${t.green}`,
     outline: "none"
   };
 
@@ -158,7 +158,7 @@ export default function GuardianSOS() {
                 padding: "12px 14px",
                 borderRadius: 8,
                 background: `${t.purple}0d`,
-                border: `1px solid ${t.purple}22`
+                border: `1px solid ${t.purple}40`
               }}>
                 {/* Avatar */}
                 <div style={{
@@ -250,24 +250,6 @@ export default function GuardianSOS() {
             </button>
           </div>
         </div>
-
-        {/* RIGHT */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{
-            ...card(t),
-            border: `1px solid ${highAlert ? t.red + "66" : t.border}`
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div style={cardTitle(t)}>
-                <span style={dot(highAlert ? t.red : t.textFaint)} />
-                HIGH-ALERT MODE
-              </div>
-
-              <Toggle value={highAlert} onChange={toggleHighAlert} activeColor={t.red} />
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   );

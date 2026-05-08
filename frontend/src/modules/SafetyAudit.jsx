@@ -31,7 +31,7 @@ export default function SafetyAudit() {
           {ALERTS.map((a, i) => {
             const color = a.status === "red" ? t.red : a.status === "amber" ? t.amber : t.green;
             return (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", borderRadius: 8, background: t.bgCard, border: `1px solid ${t.border}` }}>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", borderRadius: 8, background: t.bgCard, border: `1px solid ${t.green}` }}>
                 <div style={{ width: 40, height: 40, borderRadius: 8, background: `${color}20`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color }}>◉</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 12, color: t.text, fontFamily: "monospace" }}>{a.site}</div>
