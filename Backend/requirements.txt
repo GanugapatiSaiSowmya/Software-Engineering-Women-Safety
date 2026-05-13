@@ -10,3 +10,8 @@ piexif
 transformers
 torch
 python-multipart
+fpdf
+opencv-python-headless
+pytest
+httpx
+email-validator
