@@ -1,6 +1,7 @@
 import os
 import shutil
 import mimetypes
+import json
 from typing import Optional
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,7 +49,8 @@ def read_root():
 
 @app.post("/upload")
 async def upload_image(file: UploadFile = File(...)):
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    safe_filename = os.path.basename(file.filename)
+    file_path = os.path.join(UPLOAD_DIR, safe_filename)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
@@ -71,25 +73,26 @@ async def upload_image(file: UploadFile = File(...)):
         protected_filename = None
 
     # 4. Evidence report
-    report_file = generate_evidence_report(file.filename, ai_results['score'], gps_info)
+    report_file = generate_evidence_report(safe_filename, ai_results['score'], gps_info)
 
     return {
-        "filename":           file.filename,
+        "filename":           safe_filename,
         "gps":                gps_info,
         "ai_results":         ai_results,
         "protected_filename": protected_filename,
         "protected_url":      f"http://127.0.0.1:8000/download-protected/{protected_filename}" if protected_filename else None,
-        "report_url":         f"http://127.0.0.1:8000/download/{report_file}",
+        "report_url":         f"http://127.0.0.1:8000/download-report/{report_file}",
     }
 
 
 @app.post("/strip")
 async def strip_image(filename: str = Form(...)):
-    file_path = os.path.join(UPLOAD_DIR, filename)
+    safe_filename = os.path.basename(filename)
+    file_path = os.path.join(UPLOAD_DIR, safe_filename)
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="File not found")
 
-    base, ext     = os.path.splitext(filename)
+    base, ext     = os.path.splitext(safe_filename)
     stripped_name  = f"{base}-stripped{ext}"
     stripped_path  = os.path.join(UPLOAD_DIR, stripped_name)
 
@@ -103,7 +106,7 @@ async def strip_image(filename: str = Form(...)):
 
     return {
         "status":            "Success",
-        "original":          filename,
+        "original":          safe_filename,
         "stripped_filename": stripped_name,
         "gps_removed":       bool(removed),
         "gps_found":         gps_found_after is not None,
@@ -113,22 +116,25 @@ async def strip_image(filename: str = Form(...)):
 
 @app.get("/download-protected/{filename}") # Added {filename}
 async def download_protected(filename: str):
-    protected_path = os.path.join(UPLOAD_DIR, filename)
+    safe_filename = os.path.basename(filename)
+    protected_path = os.path.join(UPLOAD_DIR, safe_filename)
     if not os.path.exists(protected_path):
         raise HTTPException(status_code=404, detail="Protected file not found")
     mime_type, _ = mimetypes.guess_type(protected_path)
     return FileResponse(
         path       = protected_path,
-        filename   = filename,
+        filename   = safe_filename,
         media_type = mime_type or "application/octet-stream",
     )
 
 
 @app.get("/download")
 async def download(filename: str):
-    base, ext     = os.path.splitext(filename)
-    stripped_name  = f"{base}-stripped{ext}"
-    stripped_path  = os.path.join(UPLOAD_DIR, stripped_name)
+    """Serve the metadata-stripped version of an image"""
+    safe_filename = os.path.basename(filename)
+    base, ext = os.path.splitext(safe_filename)
+    stripped_name = f"{base}-stripped{ext}"
+    stripped_path = os.path.join(UPLOAD_DIR, stripped_name)
 
     if not os.path.exists(stripped_path):
         raise HTTPException(status_code=404, detail="Stripped file not found")
@@ -159,11 +165,12 @@ async def create_deepfake_alert(
     This is a quick PDF asking if they want to proceed to full takedown
     """
     try:
+        safe_filename = os.path.basename(filename)
         alert_report = create_takedown_report(
             user_id=user_id,
             user_email=user_email,
             user_name=user_name,
-            filename=filename,
+            filename=safe_filename,
             deepfake_score=deepfake_score,
             gps_data=gps_data,
             is_alert_only=True,
@@ -197,19 +204,19 @@ async def generate_takedown_package(
     This includes all 5 documents + guardian alerts
     """
     try:
-        import json
-
         platforms_list = json.loads(platforms)
         urls_list = json.loads(urls)
 
         # Generate complete package
+        safe_filename = os.path.basename(filename)
         reporter = TakedownReport(user_id, user_email, user_name)
         package = reporter.generate_full_takedown_package(
-            filename=filename,
+            filename=safe_filename,
             deepfake_score=deepfake_score,
             gps_data=gps_data,
             platforms=platforms_list,
             urls=urls_list,
+            account_handles=[],
         )
 
         # Get guardians from database
@@ -267,13 +274,14 @@ async def generate_takedown_package(
 @app.get("/download-report/{report_name}")
 async def download_report(report_name: str):
     """Download any generated takedown report"""
-    report_path = os.path.join(UPLOAD_DIR, report_name)
+    safe_report_name = os.path.basename(report_name)
+    report_path = os.path.join(UPLOAD_DIR, safe_report_name)
     if not os.path.exists(report_path):
         raise HTTPException(status_code=404, detail="Report not found")
 
     return FileResponse(
         path=report_path,
-        filename=report_name,
+        filename=safe_report_name,
         media_type="application/pdf",
     )
 
