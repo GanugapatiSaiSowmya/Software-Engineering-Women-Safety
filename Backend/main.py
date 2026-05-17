@@ -19,6 +19,7 @@ from takedown_agent import create_takedown_report, TakedownReport
 from guardian_alert import alert_guardians_on_deepfake_detection
 from models import Guardian
 from PIL import Image
+from whatsapp_sender import send_sos_message
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
@@ -285,6 +286,25 @@ async def download_report(report_name: str):
         media_type="application/pdf",
     )
 
+@app.post("/sos")
+async def trigger_sos():
+
+    try:
+
+        send_sos_message()
+
+        return {
+            "status": "success",
+            "message": "Guardian SOS triggered successfully"
+        }
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"SOS trigger failed: {str(e)}"
+        )
+        
 
 @app.get("/takedown/status/{report_id}")
 async def get_takedown_status(report_id: str):
