@@ -6,7 +6,6 @@ import FaceVerify    from "./pages/FaceVerify";
 import Header        from "./components/Header";
 import Sidebar       from "./components/Sidebar";
 import UploadGuard   from "./modules/UploadGuard";
-import SafetyAudit   from "./modules/SafetyAudit";
 import Takedown      from "./modules/Takedown";
 import GuardianSOS   from "./modules/GuardianSOS";
 import SupportHub    from "./modules/SupportHub";
@@ -14,7 +13,6 @@ import { NAV_ITEMS } from "./utils/data";
 
 const MODULES = {
   guard:    UploadGuard,
-  audit:    SafetyAudit,
   takedown: Takedown,
   sos:      GuardianSOS,
   support:  SupportHub,
@@ -22,7 +20,6 @@ const MODULES = {
 
 const PAGE_SUBTITLES = {
   guard:    "Check a photo before you post it",
-  audit:    "See what's happening with your photos online",
   takedown: "Take down fake content and build your case",
   sos:      "Alert your trusted people if you need help",
   support:  "Learn, get help, and access resources",
