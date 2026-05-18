@@ -4,6 +4,7 @@ export const NAV_ITEMS = [
   { id: "takedown", icon: "⚖️", label: "Takedown"        },
   { id: "sos",      icon: "🆘", label: "Guardian SOS"    },
   { id: "support",  icon: "❓", label: "Support Hub"    },
+  { id: "profile",  label: "Profile" }
 ];
 
 export const RISK_DATA = [
