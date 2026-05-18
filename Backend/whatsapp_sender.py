@@ -2,17 +2,16 @@ import pywhatkit
 from datetime import datetime, timedelta
 
 
-def send_sos_message(phone_number):
+def send_sos_message(phone_number, user_name):
 
-    message = """
-🚨 GUARDIAN SOS ALERT 🚨
+    message = f"""
+🚨 TRUSTED CONTACT ALERT 🚨
 
-Emergency triggered by user.
+{user_name} has triggered a safety alert.
 
-Please respond immediately.
+Please check on them immediately.
 """
 
-    # Schedule 2 minutes ahead
     send_time = datetime.now() + timedelta(minutes=2)
 
     pywhatkit.sendwhatmsg(
@@ -25,4 +24,31 @@ Please respond immediately.
         close_time=5
     )
 
-    print(f"SOS scheduled for {phone_number}")
+    print(f"Alert scheduled for {phone_number}")
+    
+
+def send_takedown_alert(phone_number, user_name):
+
+    message = f"""
+🚨 SHIELD.ai SAFETY NOTICE 🚨
+
+Potential harmful or manipulated content involving {user_name} has been identified.
+
+This notification is being shared with trusted contacts to support the user's safety and well-being.
+
+Please check in with the user as soon as possible.
+"""
+
+    send_time = datetime.now() + timedelta(minutes=2)
+
+    pywhatkit.sendwhatmsg(
+        phone_number,
+        message,
+        send_time.hour,
+        send_time.minute,
+        wait_time=10,
+        tab_close=False,
+        close_time=5
+    )
+
+    print(f"Takedown alert scheduled for {phone_number}")

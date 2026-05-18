@@ -111,12 +111,12 @@ def trigger_sos(
 
             threading.Thread(
                 target=send_sos_message,
-                args=(phone,)
+                args=(phone, request.user_id)
             ).start()
 
         return {
             "status": "success",
-            "message": "SOS Triggered!",
+            "message": "Trusted contacts notified!",
             "sos_id": sos_event.id,
             "notified": notifications,
         }

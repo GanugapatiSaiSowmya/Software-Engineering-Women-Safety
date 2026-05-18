@@ -19,7 +19,12 @@ from takedown_agent import create_takedown_report, TakedownReport
 from guardian_alert import alert_guardians_on_deepfake_detection
 from models import Guardian
 from PIL import Image
-from whatsapp_sender import send_sos_message
+from whatsapp_sender import (
+    send_sos_message,
+    send_takedown_alert
+)
+
+import threading
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
@@ -223,12 +228,20 @@ async def generate_takedown_package(
         # Get guardians from database
         guardians = db.query(Guardian).filter(Guardian.user_id == user_id).all()
         guardians_list = [
-            {"name": g.name, "phone": g.phone, "email": g.email} for g in guardians
+            {
+                "name": g.name,
+                "phone": g.phone
+            }
+            for g in guardians
         ]
 
-        # Alert guardians if they exist
+        # Alert trusted contacts if they exist
+
         alert_summary = {}
+
         if guardians_list:
+
+            # Existing alert system
             alert_summary = alert_guardians_on_deepfake_detection(
                 user_id=user_id,
                 user_name=user_name,
@@ -240,6 +253,20 @@ async def generate_takedown_package(
                 report_id=reporter.report_id,
                 urls=urls_list,
             )
+
+            # WhatsApp alerts
+            for g in guardians_list:
+
+                phone = g["phone"]
+
+                # Add +91 automatically if missing
+                if not phone.startswith("+91"):
+                    phone = f"+91{phone}"
+
+                threading.Thread(
+                    target=send_takedown_alert,
+                    args=(phone, user_name)
+                ).start()
 
         return {
             "status": "success",

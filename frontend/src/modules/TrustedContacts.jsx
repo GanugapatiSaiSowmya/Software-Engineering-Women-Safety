@@ -6,7 +6,7 @@ import { useTheme } from "../context/ThemeContext";
 const API = "http://127.0.0.1:8000";
 const USER_ID = "default_user";
 
-export default function GuardianSOS() {
+export default function TrustedContacts() {
   const t = useTheme();
 
   const [highAlert, setHighAlert] = useState(false);
@@ -272,7 +272,7 @@ export default function GuardianSOS() {
             </button>
 
             <button onClick={triggerSOS} style={{ ...actionBtn(t.red) }}>
-              🚨 Trigger SOS Now
+              Notify Trusted Contacts
             </button>
           </div>
         </div>
