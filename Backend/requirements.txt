@@ -10,3 +10,4 @@ piexif
 transformers
 torch
 python-multipart
+passlib[bcrypt]
