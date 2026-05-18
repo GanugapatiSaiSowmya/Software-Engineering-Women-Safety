@@ -5,7 +5,6 @@ import ShieldIcon from "../components/ShieldIcon";
 const FEATURES = [
   { icon: "◈", title: "Identity Vault",   desc: "Biometric enrollment with 128-d face embeddings stored only on your device." },
   { icon: "⬡", title: "Upload Guard",     desc: "Pre-flight photo sanitizer — strips GPS, blurs sensitive objects before you post." },
-  { icon: "◉", title: "Safety Audit",     desc: "AI-powered likeness detection across the web with deepfake probability scores." },
   { icon: "⚖", title: "Takedown Center",  desc: "Auto-generate evidence bundles and DMCA reports with one click." },
   { icon: "⊕", title: "Guardian SOS",     desc: "Trusted circle alerts and real-time GPS broadcast on critical threats." },
 ];

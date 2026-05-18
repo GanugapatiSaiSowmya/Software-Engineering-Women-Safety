@@ -1,6 +1,5 @@
 export const NAV_ITEMS = [
   { id: "guard",    icon: "🛡️", label: "Upload Guard"    },
-  { id: "audit",    icon: "📊", label: "Safety Audit"    },
   { id: "takedown", icon: "⚖️", label: "Takedown"        },
   { id: "sos",      icon: "🆘", label: "Guardian SOS"    },
   { id: "support",  icon: "❓", label: "Support Hub"    },
