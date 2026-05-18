@@ -2,6 +2,37 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
 
+from pydantic import BaseModel
+
+class ProfileResponse(BaseModel):
+
+    name: str
+    email: str
+
+    decoy_enabled: bool
+    decoy_ui: str
+    secret_key: str
+
+    upload_count: int
+    takedown_reports: int
+
+    guardian_count: int
+
+    bio: str | None
+
+
+class UpdateProfileRequest(BaseModel):
+
+    name: str | None = None
+
+    bio: str | None = None
+
+    decoy_enabled: bool | None = None
+
+    decoy_ui: str | None = None
+
+    secret_key: str | None = None
+
 # ── Auth ──────────────────────────────────────────────────────────────────────
 class RegisterRequest(BaseModel):
     name:     str
