@@ -16,12 +16,12 @@ import os
 # ─────────────────────────────────────────────────────────────────────────────
 
 INDIAN_IT_ACT_CLAUSES = {
-    "section_66": "Section 66 - Computer Misuse (Hacking): Whoever commits offence of computer misuse shall be punishable with imprisonment up to 3 years and fine up to ₹5 lakhs.",
-    "section_67": "Section 67 - Publishing obscene material in electronic form: Punishable with imprisonment up to 3 years and fine up to ₹5 lakhs.",
-    "section_67A": "Section 67A - Publishing material containing sexually explicit act/conduct in electronic form: Punishable with imprisonment up to 5 years and fine up to ₹10 lakhs.",
-    "section_354": "Section 354 (IPC) - Assault or Criminal Force with Intent to Outrage Modesty: Punishment - imprisonment up to 3 years and/or fine up to ₹2,000.",
-    "section_354C": "Section 354C (IPC) - Voyeurism: Punishment - imprisonment up to 3 years and/or fine up to ₹2,000.",
-    "section_354D": "Section 354D (IPC) - Stalking: Punishment - imprisonment up to 3 years and/or fine up to ₹10,000.",
+    "section_66": "Section 66 - Computer Misuse (Hacking): Whoever commits offence of computer misuse shall be punishable with imprisonment up to 3 years and fine up to Rs 5 lakhs.",
+    "section_67": "Section 67 - Publishing obscene material in electronic form: Punishable with imprisonment up to 3 years and fine up to Rs 5 lakhs.",
+    "section_67A": "Section 67A - Publishing material containing sexually explicit act/conduct in electronic form: Punishable with imprisonment up to 5 years and fine up to Rs 10 lakhs.",
+    "section_354": "Section 354 (IPC) - Assault or Criminal Force with Intent to Outrage Modesty: Punishment - imprisonment up to 3 years and/or fine up to Rs 2,000.",
+    "section_354C": "Section 354C (IPC) - Voyeurism: Punishment - imprisonment up to 3 years and/or fine up to Rs 2,000.",
+    "section_354D": "Section 354D (IPC) - Stalking: Punishment - imprisonment up to 3 years and/or fine up to Rs 10,000.",
 }
 
 PLATFORM_TEMPLATES = {
@@ -135,7 +135,7 @@ class TakedownReport:
         pdf.set_text_color(255, 255, 255)
         pdf.set_font("Helvetica", "B", 18)
         pdf.cell(
-            0, 15, "⚠ DEEPFAKE DETECTED - ALERT REPORT", ln=True, align="C", fill=True
+            0, 15, "[!] DEEPFAKE DETECTED - ALERT REPORT", ln=True, align="C", fill=True
         )
 
         pdf.set_text_color(0, 0, 0)
@@ -174,10 +174,10 @@ class TakedownReport:
             0,
             5,
             "Our AI detected this image/video contains deepfake or manipulated content designed to impersonate you without consent. This is:\n\n"
-            "✓ Illegal in India (IT Act Section 67A)\n"
-            "✓ A violation of platform ToS (Instagram, Twitter, Facebook, YouTube, TikTok)\n"
-            "✓ Potentially defamatory and harassing\n"
-            "✓ Grounds for police complaint & civil damages",
+            "- Illegal in India (IT Act Section 67A)\n"
+            "- A violation of platform ToS (Instagram, Twitter, Facebook, YouTube, TikTok)\n"
+            "- Potentially defamatory and harassing\n"
+            "- Grounds for police complaint & civil damages",
             fill=True,
         )
         pdf.ln(4)
@@ -209,11 +209,11 @@ class TakedownReport:
             0,
             5,
             "Click 'Proceed to Takedown' in SHIELD.ai to:\n\n"
-            "→ Generate a complete legal takedown package\n"
-            "→ Auto-fill platform-specific complaint forms\n"
-            "→ Create Indian Police cyber complaint\n"
-            "→ Alert your trusted contacts (Guardian SOS)\n"
-            "→ Generate evidence bundle for lawyer/court",
+            "> Generate a complete legal takedown package\n"
+            "> Auto-fill platform-specific complaint forms\n"
+            "> Create Indian Police cyber complaint\n"
+            "> Alert your trusted contacts (Guardian SOS)\n"
+            "> Generate evidence bundle for lawyer/court",
             fill=True,
         )
         pdf.ln(5)
@@ -229,8 +229,9 @@ class TakedownReport:
             align="C",
         )
 
-        report_name = f"ALERT_{self.report_id}_{filename}.pdf"
-        report_path = f"uploads/{report_name}"
+        safe_filename = os.path.basename(filename)
+        report_name = f"ALERT_{self.report_id}_{safe_filename}.pdf"
+        report_path = os.path.join("uploads", report_name)
         pdf.output(report_path)
 
         return report_name
@@ -339,7 +340,7 @@ class TakedownReport:
             "Audio-visual synchronization issues (if video)",
         ]
         for indicator in indicators:
-            pdf.cell(3, 4, "•", ln=False)
+            pdf.cell(3, 4, "-", ln=False)
             pdf.multi_cell(0, 4, indicator)
         pdf.ln(2)
 
@@ -381,8 +382,9 @@ class TakedownReport:
             0, 4, "Unauthorized distribution is prohibited. SHIELD.ai © 2026", ln=True
         )
 
-        report_name = f"FORENSIC_{self.report_id}_{filename}.pdf"
-        report_path = f"uploads/{report_name}"
+        safe_filename = os.path.basename(filename)
+        report_name = f"FORENSIC_{self.report_id}_{safe_filename}.pdf"
+        report_path = os.path.join("uploads", report_name)
         pdf.output(report_path)
 
         return report_name
@@ -477,7 +479,7 @@ Report ID: {self.report_id}
         )
 
         report_name = f"COMPLAINT_{platform.upper()}_{self.report_id}.pdf"
-        report_path = f"uploads/{report_name}"
+        report_path = os.path.join("uploads", report_name)
         pdf.output(report_path)
 
         return report_name
@@ -585,7 +587,7 @@ EVIDENCE ENCLOSED:
         pdf.cell(0, 4, "Report ID: " + self.report_id, ln=True)
 
         report_name = f"POLICE_COMPLAINT_{self.report_id}.pdf"
-        report_path = f"uploads/{report_name}"
+        report_path = os.path.join("uploads", report_name)
         pdf.output(report_path)
 
         return report_name
@@ -670,15 +672,15 @@ EVIDENCE ENCLOSED:
         pdf.multi_cell(
             0,
             3,
-            "✓ Digital evidence collected under Section 65A of Indian Evidence Act\n"
-            "✓ Hash values provide proof of integrity (no tampering)\n"
-            "✓ Timestamp provides temporal proof (evidence of discovery)\n"
-            "✓ Admissible in Indian courts as forensic evidence\n"
-            "✓ Complies with IT Act 2000 Section 94 (electronic records)",
+            "- Digital evidence collected under Section 65A of Indian Evidence Act\n"
+            "- Hash values provide proof of integrity (no tampering)\n"
+            "- Timestamp provides temporal proof (evidence of discovery)\n"
+            "- Admissible in Indian courts as forensic evidence\n"
+            "- Complies with IT Act 2000 Section 94 (electronic records)",
         )
 
         report_name = f"EVIDENCE_BUNDLE_{self.report_id}.pdf"
-        report_path = f"uploads/{report_name}"
+        report_path = os.path.join("uploads", report_name)
         pdf.output(report_path)
 
         return report_name
@@ -750,7 +752,7 @@ EVIDENCE ENCLOSED:
         )
 
         report_name = f"LAWYER_BRIEF_{self.report_id}.pdf"
-        report_path = f"uploads/{report_name}"
+        report_path = os.path.join("uploads", report_name)
         pdf.output(report_path)
 
         return report_name

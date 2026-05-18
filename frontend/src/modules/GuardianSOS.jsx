@@ -97,14 +97,40 @@ export default function GuardianSOS() {
   };
 
   const triggerSOS = async () => {
+
+  try {
+
     const res = await fetch(`${API}/sos/trigger`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: USER_ID })
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: USER_ID,
+      }),
     });
 
     const data = await res.json();
-    alert(`🚨 SOS sent to ${data.notified?.length || 0} guardian(s)!`);
+
+    console.log("SOS Response:", data);
+
+    if (res.ok) {
+
+      alert("🚨 SOS triggered successfully!");
+
+    } else {
+
+      alert(data.detail || "Failed to trigger SOS");
+
+    }
+
+  } catch (error) {
+
+    console.error("SOS Error:", error);
+
+    alert("Backend connection failed.");
+
+  }
   };
 
   const toggleHighAlert = async (val) => {

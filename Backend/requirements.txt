@@ -11,3 +11,13 @@ transformers
 torch
 python-multipart
 passlib[bcrypt]
+fpdf
+opencv-python-headless
+pytest
+httpx
+email-validator
+
+pywhatkit
+pyautogui
+keyboard
+pyperclip
