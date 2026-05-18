@@ -45,8 +45,8 @@ export const SUPPORT_FAQS = [
     answer: "Upload Guard uses advanced AI and image analysis to scan photos for sensitive content, personal identifiers, and metadata before you share them. It checks for faces, location data, license plates, and other information that could compromise your privacy. You get a risk assessment and recommendations before posting anywhere online.",
   },
   {
-    question: "What does Safety Audit do?",
-    answer: "Safety Audit continuously monitors the internet to find where your photos might have been shared without your consent. It searches across social media, image hosting sites, forums, and other platforms. When matches are found, it gives you the location, risk level, and evidence so you can take action.",
+    question: "What happens if someone uploads my image without consent?",
+    answer: "If you suspect misuse, use the Takedown module to document evidence and begin reporting or removal workflows.",
   },
   {
     question: "Can I actually remove content from websites?",
@@ -69,8 +69,12 @@ export const SUPPORT_FAQS = [
     answer: "First, document the evidence (screenshots, URLs, timestamps). Then use our Safety Audit to confirm the content. File removal requests through the Takedown module following platform-specific procedures. For serious cases like non-consensual intimate images, contact law enforcement and local authorities. Our legal resources can guide you.",
   },
   {
-    question: "How often does Safety Audit check for my photos?",
-    answer: "Safety Audit can be set to monitor continuously or on your preferred schedule. You can configure daily, weekly, or manual checks based on your needs. More frequent monitoring helps catch unauthorized content faster.",
+    question: "Can SHIELD.AI detect deepfakes?",
+    answer: "Yes. Uploaded images are checked using the integrated deepfake detection pipeline before further processing.",
+  },
+  {
+    question: "What is Decoy Mode?",
+    answer: "Decoy Mode disguises the application as another interface to improve privacy and safety in sensitive situations.",
   },
 ];
 
