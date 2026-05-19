@@ -129,28 +129,10 @@ async def upload_image(
         safe_filename
     )
 
-<<<<<<< HEAD
     with open(
         file_path,
         "wb"
     ) as buffer:
-=======
-    # 3. Apply image protection (adversarial noise, watermark, honey pixels, smart blur)
-    protected_filename = None
-    try:
-        img = Image.open(file_path).convert("RGB")
-        protected_img = protect_image(img)
-        base, ext = os.path.splitext(file.filename)
-        protected_filename = f"{base}-protected{ext if ext else '.jpg'}"
-        protected_path = os.path.join(UPLOAD_DIR, protected_filename)
-        protected_img.save(protected_path)
-        print(f"[image_protection] Successfully protected: {protected_filename}")
-    except Exception as e:
-        print(f"[image_protection] Failed: {e}")
-        import traceback
-        traceback.print_exc()
-        protected_filename = None
->>>>>>> 07e1f30cad17bec10d79488fe239c5613d7d7e85
 
         shutil.copyfileobj(
             file.file,
@@ -177,7 +159,7 @@ async def upload_image(
 
         pass
 
-
+    # Apply image protection
     protected_filename = None
 
     try:
@@ -197,17 +179,12 @@ async def upload_image(
         )
 
         protected_filename = (
-
             f"{base}-protected"
-
             f"{ext if ext else '.jpg'}"
-
         )
 
         protected_path = os.path.join(
-
             UPLOAD_DIR,
-
             protected_filename
         )
 
@@ -215,10 +192,13 @@ async def upload_image(
             protected_path
         )
 
+        print(
+            f"[image_protection] Successfully protected: {protected_filename}"
+        )
+
     except Exception as e:
 
-        print(e)
-
+        print(f"[image_protection] Failed: {e}")
 
     report_file = generate_evidence_report(
 
@@ -228,7 +208,6 @@ async def upload_image(
 
         gps_info
     )
-
 
     return {
 
@@ -263,8 +242,6 @@ async def upload_image(
         f"http://127.0.0.1:8000/download-report/{report_file}"
 
     }
-
-# FIXED UPLOAD ROUTE
 
 
 
@@ -574,7 +551,7 @@ async def download_report(report_name: str):
         report_path,
 
         filename=
-        safe_name,
+        safe_report_name,
 
         media_type=
         "application/pdf"
@@ -592,3 +569,5 @@ async def trigger_sos():
 
         "success"
     }
+    
+    

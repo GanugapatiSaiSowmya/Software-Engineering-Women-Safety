@@ -35,245 +35,31 @@ const PAGE_SUBTITLES = {
   settings: "Configure stealth, safety, and view logs",
 };
 
-<<<<<<< HEAD
-
-function Dashboard({
-
-  onLogout
-
-}) {
-
-  const t =
-    useTheme();
-
-  const [
-
-    active,
-
-    setActive
-
-  ] = useState(
-    "guard"
-  );
-
-
-  const ActiveModule =
-
-    MODULES[
-      active
-    ]
-
-    ||
-
-    Profile;
-
-
-  const currentNav =
-
-    NAV_ITEMS.find(
-
-      n =>
-
-        n.id ===
-        active
-
-    );
-
-
-  return (
-
-    <div
-
-      style={{
-
-        minHeight:
-          "100vh",
-
-        background:
-          t.bg,
-
-        fontFamily:
-          "'Courier New', monospace",
-
-        color:
-          t.text
-
-      }}
-
-    >
-
-      <Header
-        onLogout={
-          onLogout
-        }
-      />
-
-      <div
-
-        style={{
-
-          maxWidth:
-            1200,
-
-          margin:
-            "0 auto",
-
-          display:
-            "flex",
-
-          minHeight:
-
-            "calc(100vh - 60px)"
-
-        }}
-
-      >
-
-        <Sidebar
-
-          active={
-            active
-          }
-
-          onNavigate={
-            setActive
-          }
-
-        />
-
-        <main
-
-          style={{
-
-            flex: 1,
-
-            padding:
-              "32px",
-
-            overflowY:
-              "auto"
-
-          }}
-
-        >
-
-          <div
-
-            style={{
-
-              marginBottom:
-                24
-
-            }}
-
-          >
-
-            <div
-
-              style={{
-
-                fontSize:
-                  22,
-
-                fontWeight:
-                  700,
-
-                letterSpacing:
-                  1
-
-              }}
-
-            >
-
-              {
-
-                currentNav
-
-                ?.
-
-                label
-
-                ?.
-
-                toUpperCase()
-
-                ||
-
-                "PROFILE"
-
-              }
-
-            </div>
-
-            <div
-
-              style={{
-
-                fontSize:
-                  12,
-
-                marginTop:
-                  6
-
-              }}
-
-            >
-
-              {
-
-                PAGE_SUBTITLES[
-                  active
-                ]
-
-              }
-
-            </div>
-
-            <div
-
-              style={{
-
-                marginTop:
-                  10,
-
-                width:
-                  36,
-
-                height:
-                  2,
-
-                background:
-                  t.green
-
-              }}
-
-            />
-
-          </div>
-
-          <ActiveModule />
-
-=======
 function Dashboard({ onLogout, onDecoyToggle }) {
   const [active, setActive] = useState("guard");
   const ActiveModule = MODULES[active];
-  const currentNav   = NAV_ITEMS.find(n => n.id === active);
+  const currentNav = NAV_ITEMS.find(n => n.id === active);
 
   return (
-      <div className="cyber-grid min-h-screen flex flex-col overflow-hidden">
+    <div className="cyber-grid min-h-screen flex flex-col overflow-hidden">
       <Header onLogout={onLogout} onDecoyToggle={onDecoyToggle} />
 
       <div style={{ maxWidth: 1400, width: "100%", margin: "0 auto", display: "flex", flex: 1, position: "relative", overflow: "hidden" }}>
         <Sidebar active={active} onNavigate={setActive} />
+
         <main className="flex-1 px-10 py-12 overflow-y-auto relative">
           <div style={{ marginBottom: 32 }}>
             <div className="mono" style={{ fontSize: 24, fontWeight: 700, letterSpacing: 1.5, color: "#fff" }}>
-              {currentNav?.label.toUpperCase()}
+              {currentNav?.label?.toUpperCase()}
             </div>
-            <div style={{ fontSize: 13, color: "var(--slate-400)", marginTop: 8 }}>{PAGE_SUBTITLES[active]}</div>
+
+            <div style={{ fontSize: 13, color: "var(--slate-400)", marginTop: 8 }}>
+              {PAGE_SUBTITLES[active]}
+            </div>
+
             <div style={{ marginTop: 16, width: 48, height: 3, background: "var(--neon-teal)", borderRadius: 2 }} />
           </div>
-          
+
           <AnimatePresence mode="wait">
             <motion.div
               key={active}
@@ -286,35 +72,15 @@ function Dashboard({ onLogout, onDecoyToggle }) {
               <ActiveModule />
             </motion.div>
           </AnimatePresence>
->>>>>>> b1235906b8af5fb73d0085ae190c9cd6125fc419
         </main>
-
       </div>
-
     </div>
-
   );
-
 }
 
 
 function AppRoutes() {
-<<<<<<< HEAD
-
-  const [
-
-    page,
-
-    setPage
-
-  ] = useState(
-    "landing"
-  );
-
-
-=======
   const [page, setPage] = useState("loading");
->>>>>>> b1235906b8af5fb73d0085ae190c9cd6125fc419
   useEffect(() => {
 
     const token =
@@ -324,25 +90,13 @@ function AppRoutes() {
       );
 
     if (token) {
-<<<<<<< HEAD
-
-      setPage(
-        "dashboard"
-      );
-
-=======
       setPage("dashboard");
     } else {
       setPage("landing");
->>>>>>> b1235906b8af5fb73d0085ae190c9cd6125fc419
     }
 
   }, []);
 
-<<<<<<< HEAD
-
-=======
->>>>>>> b1235906b8af5fb73d0085ae190c9cd6125fc419
   const handleLoginSuccess = () => {
 
     setPage(
@@ -360,10 +114,7 @@ function AppRoutes() {
 
   };
 
-<<<<<<< HEAD
 
-=======
->>>>>>> b1235906b8af5fb73d0085ae190c9cd6125fc419
   const handleLogout = () => {
 
     localStorage.removeItem(
