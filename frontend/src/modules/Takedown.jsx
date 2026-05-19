@@ -79,6 +79,7 @@ export default function Takedown() {
       });
     }, 80);
 
+    console.log("USER INFO:", userInfo);
     // Actually call backend to generate alert
     if (userInfo && sampleDeepfakeData) {
       try {
