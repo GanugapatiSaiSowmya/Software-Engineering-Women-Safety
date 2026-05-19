@@ -1,8 +1,9 @@
 export const NAV_ITEMS = [
   { id: "guard",    icon: "🛡️", label: "Upload Guard"    },
-  { id: "takedown", icon: "⚖️", label: "Takedown"        },
+  { id: "takedown", icon: "⚖️", label: "Takedown Manager" },
   { id: "sos",      icon: "🆘", label: "Guardian SOS"    },
-  { id: "support",  icon: "❓", label: "Support Hub"    },
+  { id: "support",  icon: "❓", label: "Support Hub"     },
+  { id: "settings", icon: "⚙️", label: "Settings"        },
 ];
 
 export const RISK_DATA = [
