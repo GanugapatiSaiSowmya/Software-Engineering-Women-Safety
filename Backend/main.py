@@ -60,7 +60,13 @@ from models import (
 )
 
 from PIL import Image
-from whatsapp_sender import send_sos_message
+
+from whatsapp_sender import (
+    send_sos_message,
+    send_takedown_alert
+)
+
+import threading
 
 
 Base.metadata.create_all(bind=engine)
@@ -361,9 +367,9 @@ async def download_protected(
     )
 
     return FileResponse(
-        path       = stripped_path,
-        filename   = stripped_name,
-        media_type = mime_type or "application/octet-stream",
+        path=protected_path,
+        filename=safe_filename,
+        media_type=mime_type or "application/octet-stream",
     )
 
 
@@ -379,6 +385,7 @@ async def create_deepfake_alert(
     filename: str = Form(...),
     deepfake_score: float = Form(...),
     gps_data: Optional[str] = Form(None),
+    db: Session = Depends(get_db)
 ):
     """
     When user sees deepfake detected result, create ALERT report
@@ -395,6 +402,25 @@ async def create_deepfake_alert(
             gps_data=gps_data,
             is_alert_only=True,
         )
+        
+                # Notify trusted contacts immediately
+
+        guardians = db.query(Guardian).filter(
+            Guardian.user_id == user_id
+        ).all()
+
+        for g in guardians:
+
+            phone = g.phone
+
+            if not phone.startswith("+91"):
+
+                phone = f"+91{phone}"
+
+            threading.Thread(
+                target=send_takedown_alert,
+                args=(phone, user_name)
+            ).start()
 
         return {
             "status": "success",
@@ -442,13 +468,38 @@ async def generate_takedown_package(
         # Get guardians from database
         guardians = db.query(Guardian).filter(Guardian.user_id == user_id).all()
         guardians_list = [
-            {"name": g.name, "phone": g.phone, "email": g.email} for g in guardians
-        ]
+                {
+                    "name": g.name,
+                    "phone": g.phone
+                }
+                for g in guardians
+            ]
 
+    
         # Alert guardians if they exist
         alert_summary = {}
+
         if guardians_list:
+
+            import time
+            # WhatsApp alerts to trusted contacts
+            for g in guardians_list:
+
+                phone = g["phone"]
+
+                if not phone.startswith("+91"):
+                    phone = f"+91{phone}"
+
+                threading.Thread(
+                    target=send_takedown_alert,
+                    args=(phone, user_name)
+                ).start()
+                
+                time.sleep(5)
+
+            # Existing guardian alert system
             alert_summary = alert_guardians_on_deepfake_detection(
+
                 user_id=user_id,
                 user_name=user_name,
                 user_email=user_email,

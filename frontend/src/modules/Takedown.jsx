@@ -32,9 +32,9 @@ export default function Takedown() {
 
   // Fetch user info from localStorage on mount
   useEffect(() => {
-    const token = localStorage.getItem("shield_token");
-    const email = localStorage.getItem("shield_user_email");
-    const name = localStorage.getItem("shield_user_name");
+    const token = localStorage.getItem("token");
+    const email = localStorage.getItem("email");
+    const name = localStorage.getItem("name");
 
     if (token && email && name) {
       setUserInfo({ token, email, name, id: email.split("@")[0] });
@@ -45,6 +45,7 @@ export default function Takedown() {
   // STEP 1: Generate Alert Report
   // ─────────────────────────────────────────────────────────────────────────
   const buildEvidence = async () => {
+    console.log("BUILD EVIDENCE CLICKED");
     // Simulate: Check if there's a recent deepfake from uploads
     // In real app, this would come from UploadGuard context
     const sampleDeepfakeData = {
@@ -89,7 +90,14 @@ export default function Takedown() {
         formData.append("deepfake_score", sampleDeepfakeData.deepfake_score);
         formData.append("gps_data", sampleDeepfakeData.gps_data);
 
-        const response = await axios.post(`${API}/takedown/alert`, formData);
+        console.log("BUILD EVIDENCE CLICKED");
+        console.log(userInfo);
+        console.log("Sending request...");
+
+        const response = await axios.post(
+          `${API}/takedown/alert`,
+          formData
+        );
 
         if (response.data.alert_report) {
           setReports((prev) => ({

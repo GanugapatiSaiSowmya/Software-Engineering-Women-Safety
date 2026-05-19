@@ -20,7 +20,7 @@ Please check on them immediately.
         send_time.hour,
         send_time.minute,
         wait_time=10,
-        tab_close=False,
+        tab_close=True,
         close_time=5
     )
 
@@ -52,3 +52,4 @@ Please check in with the user as soon as possible.
     )
 
     print(f"Takedown alert scheduled for {phone_number}")
+    

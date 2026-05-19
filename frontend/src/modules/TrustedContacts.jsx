@@ -3,6 +3,7 @@ import { card, cardTitle, dot, actionBtn } from "../styles/theme";
 import { useTheme } from "../context/ThemeContext";
 
 const API = "http://127.0.0.1:8000";
+const USER_ID = "default_user";
 
 export default function TrustedContacts() {
 
@@ -26,29 +27,16 @@ export default function TrustedContacts() {
 
     try {
 
-      const token = localStorage.getItem(
-        "token"
-      );
-
       const res = await fetch(
-
-        `${API}/guardians`,
-
-        {
-          headers: {
-            Authorization:
-            `Bearer ${token}`
-          }
-        }
-
+        `${API}/guardians?user_id=${USER_ID}`
       );
 
       const data = await res.json();
 
       setGuardians(
         Array.isArray(data)
-        ? data
-        : []
+          ? data
+          : []
       );
 
     }
@@ -56,7 +44,7 @@ export default function TrustedContacts() {
     catch {
 
       setError(
-        "Could not load guardians."
+        "Could not load trusted contacts."
       );
 
     }
@@ -67,17 +55,13 @@ export default function TrustedContacts() {
   const addGuardian = async () => {
 
     if (
-
       !newName.trim()
-
       ||
-
       !newPhone.trim()
-
     ) {
 
       setError(
-        "Enter name and phone."
+        "Please enter both name and phone."
       );
 
       return;
@@ -90,10 +74,6 @@ export default function TrustedContacts() {
 
     try {
 
-      const token = localStorage.getItem(
-        "token"
-      );
-
       await fetch(
 
         `${API}/guardians/add`,
@@ -103,20 +83,16 @@ export default function TrustedContacts() {
           method: "POST",
 
           headers: {
-
-            "Content-Type":
-            "application/json",
-
-            Authorization:
-            `Bearer ${token}`
-
+            "Content-Type": "application/json"
           },
 
           body: JSON.stringify({
 
             name: newName,
 
-            phone: newPhone
+            phone: newPhone,
+
+            user_id: USER_ID
 
           })
 
@@ -125,7 +101,6 @@ export default function TrustedContacts() {
       );
 
       setNewName("");
-
       setNewPhone("");
 
       fetchGuardians();
@@ -135,7 +110,7 @@ export default function TrustedContacts() {
     catch {
 
       setError(
-        "Failed to add guardian."
+        "Failed to add trusted contact."
       );
 
     }
@@ -156,7 +131,7 @@ export default function TrustedContacts() {
       `${API}/guardians/${id}`,
 
       {
-        method:"DELETE"
+        method: "DELETE"
       }
 
     );
@@ -166,35 +141,35 @@ export default function TrustedContacts() {
   };
 
 
-  const saveEdit = async(id)=>{
+  const saveEdit = async (id) => {
 
     setGuardians(
 
-      prev=>
+      prev =>
 
-      prev.map(
+        prev.map(
 
-        g=>
+          g =>
 
-        g.id===id
+            g.id === id
 
-        ?
+              ?
 
-        {
+              {
 
-          ...g,
+                ...g,
 
-          name:editName,
+                name: editName,
 
-          phone:editPhone
+                phone: editPhone
 
-        }
+              }
 
-        :
+              :
 
-        g
+              g
 
-      )
+        )
 
     );
 
@@ -203,9 +178,9 @@ export default function TrustedContacts() {
   };
 
 
-  const triggerSOS = async()=>{
+  const triggerSOS = async () => {
 
-    try{
+    try {
 
       await fetch(
 
@@ -213,24 +188,14 @@ export default function TrustedContacts() {
 
         {
 
-          method:"POST",
+          method: "POST",
 
-          headers:{
-
-            "Content-Type":
-
-            "application/json"
-
+          headers: {
+            "Content-Type": "application/json"
           },
 
-          body:JSON.stringify({
-
-            user_id:
-
-            localStorage.getItem(
-              "email"
-            )
-
+          body: JSON.stringify({
+            user_id: USER_ID
           })
 
         }
@@ -238,15 +203,15 @@ export default function TrustedContacts() {
       );
 
       alert(
-        "🚨 SOS Triggered"
+        "🚨 SOS triggered successfully!"
       );
 
     }
 
-    catch{
+    catch {
 
       alert(
-        "Failed"
+        "Failed to notify trusted contacts."
       );
 
     }
@@ -254,179 +219,212 @@ export default function TrustedContacts() {
   };
 
 
-  const inputStyle={
+  const inputStyle = {
 
-    flex:1,
+    flex: 1,
 
-    padding:"10px 12px",
+    padding: "9px 12px",
 
-    borderRadius:8,
+    borderRadius: 6,
 
-    background:t.input,
+    fontSize: 12,
 
-    color:t.text,
+    background: t.input,
 
-    border:
+    color: t.text,
 
-    `1px solid ${t.green}`,
+    border: `1px solid ${t.green}`,
 
-    outline:"none"
+    outline: "none"
 
   };
 
 
-  const actionGhost=(color)=>({
+  return (
 
-    padding:"8px 12px",
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
-    borderRadius:8,
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
 
-    border:
+        <div style={card(t)}>
 
-    `1px solid ${color}`,
+          <div style={cardTitle(t)}>
 
-    background:
+            <span style={dot(t.purple)} />
 
-    `${color}15`,
+            TRUSTED CONTACTS
 
-    color,
-
-    cursor:"pointer",
-
-    fontWeight:700,
-
-    fontSize:11
-
-  });
-
-
-  return(
-
-    <div style={{
-
-      display:"flex",
-
-      flexDirection:"column",
-
-      gap:20
-
-    }}>
-
-      <div style={card(t)}>
-
-        <div style={cardTitle(t)}>
-
-          <span style={dot(t.purple)} />
-
-          TRUSTED CIRCLE
-
-        </div>
-
-
-        <div style={{
-
-          marginTop:18,
-
-          display:"flex",
-
-          flexDirection:"column",
-
-          gap:12
-
-        }}>
-
-          {
-
-            guardians.length===0 &&
-
-            <div style={{
-
-              textAlign:"center",
-
-              color:t.textDim
-
-            }}>
-
-              No guardians added yet
-
-            </div>
-
-          }
-
-
-            <button onClick={triggerSOS} style={{ ...actionBtn(t.red) }}>
-              Notify Trusted Contacts
-            </button>
           </div>
 
+          <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
 
-          {
+            {guardians.length === 0 && (
 
-            error &&
+              <div style={{ fontSize: 11, color: t.textFaint, textAlign: "center" }}>
 
-            <div style={{
+                No trusted contacts added yet.
 
-              color:t.red
+              </div>
 
-            }}>
+            )}
 
-              {error}
+            {guardians.map((g) => (
+
+              <div
+                key={g.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 14px",
+                  borderRadius: 8,
+                  background: `${t.purple}0d`,
+                  border: `1px solid ${t.purple}40`
+                }}
+              >
+
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    background: `${t.purple}22`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 14,
+                    color: t.purple,
+                    fontWeight: 700
+                  }}
+                >
+                  {g.name[0].toUpperCase()}
+                </div>
+
+                <div style={{ flex: 1 }}>
+
+                  {editingId === g.id ? (
+
+                    <>
+
+                      <input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        style={{ width: "100%", marginBottom: 4, padding: 4 }}
+                      />
+
+                      <input
+                        value={editPhone}
+                        onChange={(e) => setEditPhone(e.target.value)}
+                        style={{ width: "100%", padding: 4 }}
+                      />
+
+                    </>
+
+                  ) : (
+
+                    <>
+
+                      <div style={{ fontSize: 13, color: t.text, fontWeight: 600 }}>
+
+                        {g.name}
+
+                      </div>
+
+                      <div style={{ fontSize: 10, color: t.textDim }}>
+
+                        {g.phone}
+
+                      </div>
+
+                    </>
+
+                  )}
+
+                </div>
+
+                <div
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: t.green
+                  }}
+                />
+
+                {editingId === g.id ? (
+
+                  <>
+
+                    <button onClick={() => saveEdit(g.id)}>✔</button>
+
+                    <button onClick={() => setEditingId(null)}>✖</button>
+
+                  </>
+
+                ) : (
+
+                  <>
+
+                    <button
+                      onClick={() => {
+
+                        setEditingId(g.id);
+
+                        setEditName(g.name);
+
+                        setEditPhone(g.phone);
+
+                      }}
+                    >
+                      ✏️
+                    </button>
+
+                    <button onClick={() => removeGuardian(g.id)}>×</button>
+
+                  </>
+
+                )}
+
+              </div>
+
+            ))}
+
+            <div style={{ display: "flex", gap: 8 }}>
+
+              <input
+                placeholder="Name"
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                style={inputStyle}
+              />
+
+              <input
+                placeholder="Phone"
+                value={newPhone}
+                onChange={e => setNewPhone(e.target.value)}
+                style={inputStyle}
+              />
 
             </div>
 
-          }
+            {error && <div style={{ color: t.red }}>{error}</div>}
 
+            <button
+              onClick={addGuardian}
+              disabled={loading}
+              style={{ ...actionBtn(t.purple) }}
+            >
+              {loading ? "Adding…" : "⊕ Add Trusted Contact"}
+            </button>
 
-          <button
+            <button
+              onClick={triggerSOS}
+              style={{ ...actionBtn(t.red) }}
+            >
+              🚨 Notify Trusted Contacts
+            </button>
 
-            onClick={addGuardian}
-
-            disabled={loading}
-
-            style={
-
-              actionBtn(
-                t.purple
-              )
-
-            }
-
-          >
-
-            {
-
-              loading
-
-              ?
-
-              "Adding..."
-
-              :
-
-              "⊕ Add Guardian"
-
-            }
-
-          </button>
-
-
-          <button
-
-            onClick={triggerSOS}
-
-            style={
-
-              actionBtn(
-                t.red
-              )
-
-            }
-
-          >
-
-            🚨 Trigger SOS Now
-
-          </button>
+          </div>
 
         </div>
 
