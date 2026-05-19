@@ -213,10 +213,36 @@ export default function Takedown() {
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
       {/* LEFT: Evidence Bundle Generator */}
       <div style={{ ...card(t) }}>
-        <div style={{ ...cardTitle(t)}}>
-          <span style={dot(t.red)} />
+        
+        <div
+        style={{
+          ...cardTitle(t),
+          display: "flex",
+          alignItems: "center",
+          gap: 10
+        }}
+      >
+        <span style={dot(t.red)} />
+
+        <span>
           EVIDENCE BUNDLE GENERATOR
-        </div>
+        </span>
+
+        <span
+          style={{
+            fontSize: 9,
+            padding: "3px 8px",
+            borderRadius: 20,
+            background: `${t.amber}22`,
+            border: `1px solid ${t.amber}`,
+            color: t.amber,
+            fontWeight: 700,
+            letterSpacing: 1
+          }}
+        >
+          BETA
+        </span>
+      </div>
 
         <div style={{ marginTop: 20 }}>
           {EVIDENCE_STEPS.map((s, i) => (
