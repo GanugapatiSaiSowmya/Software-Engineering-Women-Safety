@@ -88,3 +88,36 @@ class SOSRequest(BaseModel):
 class HighAlertToggle(BaseModel):
     user_id: str
     enabled: bool
+
+# ── Stealth & Safety ──────────────────────────────────────────────────────────
+
+class StealthSettingsUpdate(BaseModel):
+    stealth_enabled: Optional[bool] = None
+    stealth_level: Optional[int] = None
+    decoy_skin: Optional[str] = None
+    new_secret_key: Optional[str] = None
+
+class StealthSettingsResponse(BaseModel):
+    stealth_enabled: bool
+    stealth_level: int
+    decoy_skin: str
+
+    class Config:
+        from_attributes = True
+
+
+
+class AccessLogResponse(BaseModel):
+    id: str
+    event_type: str
+    timestamp: datetime
+    ip_address: Optional[str]
+    device_info: Optional[str]
+    status: str
+
+    class Config:
+        from_attributes = True
+
+class VerifyDecoyRequest(BaseModel):
+    email: EmailStr
+    secret_key: str

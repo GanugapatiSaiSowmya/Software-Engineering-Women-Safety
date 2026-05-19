@@ -1,32 +1,26 @@
+import { motion } from "framer-motion";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 export default function ThemeToggle() {
   const t = useTheme();
   return (
-    <div
+    <motion.button
+      type="button"
       onClick={t.toggle}
-      title={t.dark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-      style={{
-        display: "flex", alignItems: "center", gap: 8,
-        cursor: "pointer", userSelect: "none",
-      }}
+      title={t.dark ? "Switch to light mode" : "Switch to dark mode"}
+      className="flex items-center gap-2 px-2 py-1 rounded-md border border-white/5 bg-white/[0.03] hover:border-[#2dd4bf]/30 transition-colors"
+      whileTap={{ scale: 0.95 }}
     >
-      <span style={{ fontSize: 12, color: t.textDim }}>{t.dark ? "🌙" : "☀️"}</span>
-      <div style={{
-        width: 44, height: 24, borderRadius: 12,
-        background: t.dark ? "#1e293b" : "#cbd5e1",
-        border: `1px solid ${t.dark ? "#334155" : "#94a3b8"}`,
-        position: "relative", transition: "all 0.3s",
-      }}>
-        <div style={{
-          position: "absolute", top: 3,
-          left: t.dark ? 22 : 3,
-          width: 16, height: 16, borderRadius: "50%",
-          background: t.dark ? t.green : "#f59e0b",
-          transition: "left 0.3s",
-          boxShadow: `0 0 6px ${t.dark ? t.green : "#f59e0b"}`,
-        }} />
+      {t.dark ? <Moon size={16} className="text-[#2dd4bf]" /> : <Sun size={16} className="text-amber-400" />}
+      <div className="w-10 h-5 rounded-full bg-[#121c2a] border border-white/10 relative">
+        <motion.div
+          className="absolute top-0.5 w-4 h-4 rounded-full"
+          style={{ background: t.dark ? "#2dd4bf" : "#f59e0b", boxShadow: t.dark ? "0 0 8px rgba(45,212,191,0.6)" : "0 0 8px rgba(245,158,11,0.5)" }}
+          animate={{ left: t.dark ? 20 : 2 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        />
       </div>
-    </div>
+    </motion.button>
   );
 }

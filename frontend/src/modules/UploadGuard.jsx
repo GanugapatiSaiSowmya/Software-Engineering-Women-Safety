@@ -1,50 +1,87 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { card, cardTitle, dot, actionBtn } from "../styles/theme";
-import { useTheme } from "../context/ThemeContext";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShieldCheck, Crosshair, AlertTriangle, Fingerprint, Lock, Download } from "lucide-react";
+import { useToast } from "../context/ToastContext";
 
-const CHECKS = [
-  "GPS Metadata Extraction",
-  "Adversarial Noise Injection",
-  "Digital Watermark Embedding",
-  "Honey-Pixel Traps",
+const SCAN_PROTOCOLS = [
+  { id: "exif", label: "EXIF Metadata Purge", duration: 1200 },
+  { id: "telemetry", label: "Stripping Telemetry", duration: 1600 },
+  { id: "deepfake", label: "Deepfake Neural Analysis", duration: 2200 },
+  { id: "hash", label: "Binary Hash Verification", duration: 1400 },
 ];
 
 export default function UploadGuard() {
-  const t = useTheme();
-  const [dragging, setDragging]       = useState(false);
-  const [file, setFile]               = useState(null);
-  const [previewUrl, setPreviewUrl]   = useState(null);
-  const [analyzing, setAnalyzing]     = useState(false);
-  const [analyzed, setAnalyzed]       = useState(false);
-  const [gpsFound, setGpsFound]       = useState(false);
-  const [gpsRemoved, setGpsRemoved]   = useState(false);
-  const [realGps, setRealGps]         = useState("");
-  const [deepfake, setDeepfake]       = useState(null);
+  const { showToast } = useToast();
+  const [dragging, setDragging] = useState(false);
+  const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzed, setAnalyzed] = useState(false);
+  const [protocolProgress, setProtocolProgress] = useState({});
+  const [gpsFound, setGpsFound] = useState(false);
+  const [realGps, setRealGps] = useState("");
+  const [deepfake, setDeepfake] = useState(null);
   const [protectedUrl, setProtectedUrl] = useState(null);
   const [finalFilename, setFinalFilename] = useState(null);
-  const [toast, setToast]             = useState(null);
-  const toastTimer                    = useRef(null);
+  const timersRef = useRef([]);
 
   useEffect(() => {
     return () => {
-      if (toastTimer.current) clearTimeout(toastTimer.current);
+      timersRef.current.forEach(clearTimeout);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
 
-  const showToast = (msg, type = "info") => {
-    setToast({ msg, type });
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  const runProtocolAnimation = () => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    const initial = {};
+    SCAN_PROTOCOLS.forEach((p) => { initial[p.id] = 0; });
+    setProtocolProgress(initial);
+
+    let offset = 0;
+    SCAN_PROTOCOLS.forEach((protocol) => {
+      const startId = setTimeout(() => {
+        setProtocolProgress((prev) => ({ ...prev, [protocol.id]: 30 }));
+      }, offset);
+      timersRef.current.push(startId);
+
+      const midId = setTimeout(() => {
+        setProtocolProgress((prev) => ({ ...prev, [protocol.id]: 70 }));
+      }, offset + protocol.duration * 0.4);
+      timersRef.current.push(midId);
+
+      const endId = setTimeout(() => {
+        setProtocolProgress((prev) => ({ ...prev, [protocol.id]: 100 }));
+      }, offset + protocol.duration);
+      timersRef.current.push(endId);
+
+      offset += protocol.duration * 0.85;
+    });
   };
 
  const handleDrop = async (e) => {
 
+<<<<<<< HEAD
   e.preventDefault();
+=======
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setFile(selectedFile);
+    setPreviewUrl(URL.createObjectURL(selectedFile));
+    setAnalyzing(true);
+    setAnalyzed(false);
+    setDeepfake(null);
+    setGpsFound(false);
+    setRealGps("");
+    setProtectedUrl(null);
+    setFinalFilename(null);
+    runProtocolAnimation();
+>>>>>>> b1235906b8af5fb73d0085ae190c9cd6125fc419
 
   setDragging(false);
 
+<<<<<<< HEAD
   const selectedFile =
 
     e.dataTransfer?.files?.[0]
@@ -158,6 +195,22 @@ export default function UploadGuard() {
         data.gps
       );
 
+=======
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/upload", formData);
+      const data = response.data;
+      if (data.gps) { setGpsFound(true); setRealGps(data.gps); }
+      if (data.ai_results) setDeepfake(data.ai_results);
+      if (data.protected_url) setProtectedUrl(data.protected_url);
+      if (data.final_filename) setFinalFilename(data.final_filename);
+      setAnalyzing(false);
+      setAnalyzed(true);
+      showToast("Neural scan complete — file sanitized.", "success");
+    } catch {
+      setAnalyzing(false);
+      timersRef.current.forEach(clearTimeout);
+      showToast("Security alert: Backend connection failed.", "alert");
+>>>>>>> b1235906b8af5fb73d0085ae190c9cd6125fc419
     }
 
 
@@ -254,27 +307,45 @@ export default function UploadGuard() {
 
 };
 
-  const cardBg = (color) => t.dark ? `${color}06` : "#FFFFFF";
-
-  const deepfakeColor = () => {
-    if (!deepfake || deepfake.score === null) return t.textDim;
-    if (deepfake.score > 0.7) return t.red;
-    if (deepfake.score > 0.4) return t.amber;
-    return t.green;
+  const PrivacyGauge = ({ score }) => {
+    const radius = 36;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (score / 100) * circumference;
+    const color = score > 70 ? "var(--danger-red)" : score > 40 ? "var(--warning-orange)" : "var(--neon-teal)";
+    return (
+      <div className="relative w-[90px] h-[90px] flex items-center justify-center">
+        <svg width="90" height="90" className="-rotate-90">
+          <circle cx="45" cy="45" r={radius} stroke="#1e293b" strokeWidth="6" fill="transparent" />
+          <circle cx="45" cy="45" r={radius} stroke={color} strokeWidth="6" fill="transparent" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} style={{ transition: "stroke-dashoffset 1.5s ease-out" }} />
+        </svg>
+        <motion.div className="absolute text-center" initial={{ scale: 0.8 }} animate={{ scale: 1 }}>
+          <div className="mono text-lg font-bold" style={{ color }}>{score}%</div>
+          <div className="text-[9px] text-slate-500 tracking-widest">RISK</div>
+        </motion.div>
+      </div>
+    );
   };
 
+  const riskScore = deepfake ? Math.round(deepfake.score * 100) : (gpsFound ? 65 : 15);
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-
-      {/* Toast */}
-      {toast && (
-        <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 999 }}>
-          <div style={{ padding: "10px 20px", color: "#fff", borderRadius: 8, background: toast.type === "error" ? t.red : t.green, fontSize: 12, fontFamily: "'Courier New', monospace", boxShadow: `0 4px 12px ${toast.type === "error" ? t.red : t.green}44` }}>
-            {toast.msg}
-          </div>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-6 pb-10">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 mb-2">
+        <Crosshair size={22} className="text-[#2dd4bf]" />
+        <div>
+          <h3 className="text-lg font-bold tracking-widest text-white">NEURAL PROTECTION INTERFACE</h3>
+          <p className="text-xs text-slate-500 mono mt-1">Deepfake / EXIF sandbox · local processing only</p>
         </div>
-      )}
+      </motion.div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <motion.div layout className="glass-card glass-card-mint flex flex-col overflow-hidden">
+          <div className="px-6 py-5 border-b border-white/5 flex items-center gap-3">
+            <Fingerprint size={20} className="text-[#2dd4bf]" />
+            <span className="text-sm font-semibold tracking-widest text-white">SCANNER VIEWPORT</span>
+          </div>
+
+<<<<<<< HEAD
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
 
         {/* Drop zone */}
@@ -339,12 +410,33 @@ export default function UploadGuard() {
                   <span style={{ fontSize: 10, color: t.textDim, width: 160, textAlign: "right" }}>
                     {check}
                   </span>
+=======
+          <div className="p-6 flex-1 flex flex-col">
+            <label
+              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={handleDrop}
+              className={`flex-1 min-h-[280px] rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden ${
+                dragging ? "border-[#2dd4bf] bg-[#2dd4bf]/10" : "border-slate-800 bg-[#121c2a]/80 hover:border-[#2dd4bf]/40"
+              }`}
+            >
+              <input type="file" accept="image/*" onChange={handleDrop} className="hidden" />
+              {previewUrl ? (
+                <>
+                  <img src={previewUrl} alt="Preview" className="max-w-full max-h-60 rounded-lg object-contain z-10" />
+                  {analyzing && <div className="animate-scan-line z-20" />}
+                </>
+              ) : (
+                <div className="text-center p-8">
+                  <Fingerprint size={48} className="text-slate-500 mx-auto mb-4" />
+                  <p className="text-slate-300 font-medium mb-2">Drop target imagery here</p>
+                  <p className="text-xs text-slate-500 mono">Initialize deepfake &amp; EXIF neural scan</p>
+>>>>>>> b1235906b8af5fb73d0085ae190c9cd6125fc419
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              )}
+            </label>
 
+<<<<<<< HEAD
         {/* Results */}
 
 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -449,6 +541,93 @@ export default function UploadGuard() {
 
             </a>
 
+=======
+            <AnimatePresence>
+              {analyzing && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0 }} className="mt-6 space-y-4">
+                  <motion.div className="flex items-center gap-3 text-[#2dd4bf] text-sm tracking-wide">
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }} className="w-4 h-4 rounded-full border-2 border-dashed border-[#2dd4bf]" />
+                    NEURAL NETWORK ANALYZING…
+                  </motion.div>
+                  {SCAN_PROTOCOLS.map((protocol, i) => (
+                    <motion.div key={protocol.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }} className="space-y-1.5">
+                      <div className="flex justify-between mono text-[11px]">
+                        <span className="text-slate-400">{protocol.label.toUpperCase()}</span>
+                        <span className="text-[#2dd4bf]">{protocolProgress[protocol.id] || 0}%</span>
+                      </div>
+                      <motion.div className="h-1 rounded-full bg-slate-800 overflow-hidden">
+                        <motion.div
+                          className="h-full bg-[#2dd4bf] rounded-full"
+                          style={{ boxShadow: "0 0 8px rgba(45,212,191,0.5)" }}
+                          animate={{ width: `${protocolProgress[protocol.id] || 0}%` }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </motion.div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+
+        <div className="flex flex-col gap-6">
+          {analyzed ? (
+            <>
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 border-t-4" style={{ borderTopColor: riskScore > 70 ? "var(--danger-red)" : "var(--neon-teal)" }}>
+                <div className="flex items-center gap-6">
+                  <PrivacyGauge score={riskScore} />
+                  <div>
+                    <h3 className="text-lg text-white mb-2 flex items-center gap-2">
+                      {riskScore > 70 ? <AlertTriangle size={20} className="text-rose-500" /> : <ShieldCheck size={20} className="text-[#2dd4bf]" />}
+                      SECURITY AUDIT COMPLETE
+                    </h3>
+                    <p className="text-sm text-slate-400 leading-relaxed">
+                      {riskScore > 70 ? "High risk elements detected. Immediate purging recommended." : "Threat level acceptable. Defensive measures applied."}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="glass-card p-5 bg-[#121c2a]/60">
+                  <div className="text-xs font-bold tracking-widest text-amber-500 mb-4 border-b border-white/5 pb-2">PRIVACY TRIGGERS</div>
+                  <ul className="space-y-3 text-xs text-slate-300">
+                    {gpsFound && <li><span className="text-rose-500 mr-2">⨯</span>EXIF Location: {realGps}</li>}
+                    {deepfake?.is_deepfake && <li><span className="text-rose-500 mr-2">⨯</span>AI Manipulation Detected</li>}
+                    {!gpsFound && !deepfake?.is_deepfake && <li className="text-slate-500">No critical triggers.</li>}
+                  </ul>
+                </motion.div>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="glass-card p-5 bg-[#121c2a]/60">
+                  <motion.div className="text-xs font-bold tracking-widest text-[#2dd4bf] mb-4 border-b border-white/5 pb-2">DEFENSE PLAN</motion.div>
+                  <ul className="space-y-3 text-xs text-slate-300">
+                    <li><span className="text-[#2dd4bf] mr-2">✓</span>Metadata Stripped</li>
+                    <li><span className="text-[#2dd4bf] mr-2">✓</span>Adversarial Noise Added</li>
+                  </ul>
+                </motion.div>
+              </div>
+
+              {protectedUrl && (
+                <motion.a
+                  href={protectedUrl}
+                  download={finalFilename || "protected-image.jpg"}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(45,212,191,0.4)" }}
+                  className="glass-card flex items-center justify-center gap-3 py-5 bg-[#2dd4bf] text-[#0a111a] font-bold tracking-widest text-sm no-underline"
+                >
+                  <Download size={20} />
+                  EXECUTE PURGE &amp; SECURE DOWNLOAD
+                </motion.a>
+              )}
+            </>
+          ) : !analyzing && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card flex flex-col items-center justify-center min-h-[380px] gap-4 text-center bg-[#121c2a]/60">
+              <Lock size={48} className="text-slate-800" />
+              <p className="text-sm font-bold tracking-[0.2em] text-slate-500">AWAITING DATA</p>
+              <p className="text-xs text-slate-600 max-w-[220px]">Upload imagery to initialize security audit and cloaking protocols</p>
+            </motion.div>
+>>>>>>> b1235906b8af5fb73d0085ae190c9cd6125fc419
           )}
 
         </div>
@@ -546,6 +725,6 @@ export default function UploadGuard() {
 
 </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

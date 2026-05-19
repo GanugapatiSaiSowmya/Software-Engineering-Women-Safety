@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import axios from "axios";
 import ShieldIcon from "../components/ShieldIcon";
 import ThemeToggle from "../components/ThemeToggle";
@@ -311,9 +312,12 @@ export default function FaceVerify({ onVerified, onLogout }) {
   const isLive      = phase === "live";
 
   const borderColor =
-    isSuccess                         ? t.green :
-    isLocked || isFailed || isError   ? t.red   :
-    isLive || isScanning              ? t.green  : t.borderMid;
+    isSuccess                         ? "#2dd4bf" :
+    isLocked || isFailed || isError   ? "#f43f5e"   :
+    isLive || isScanning              ? "#2dd4bf"  : "rgba(45,212,191,0.35)";
+
+  const SCAN_STEPS = ["ALIGN", "CAPTURE", "HASH", "VERIFY"];
+  const filledSteps = isScanning ? Math.min(SCAN_STEPS.length, Math.floor((progress / 100) * SCAN_STEPS.length) + (progress > 0 ? 1 : 0)) : 0;
 
   const CIRC = 754;
 
@@ -334,13 +338,17 @@ export default function FaceVerify({ onVerified, onLogout }) {
         @keyframes fadeUp     { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         @keyframes arcSweep   { from{stroke-dashoffset:754} to{stroke-dashoffset:0} }
         @keyframes arcPulse   { 0%,100%{opacity:1} 50%{opacity:0.6} }
+        @keyframes slideInDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes laserScan { 0%{top:-10%} 50%{top:100%} 100%{top:-10%} }
+        @keyframes dotFill { 0%{background:transparent} 100%{background:currentColor} }
         * { box-sizing:border-box; margin:0; padding:0; }
+        .glass-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(12px); border: 1px solid rgba(26,222,126,0.15); }
       `}</style>
 
       <div style={{ position: "fixed", width: 400, height: 400, top: "-10%", right: "-10%", borderRadius: "50%", background: `${t.green}0a`, filter: "blur(80px)", pointerEvents: "none" }} />
 
       {/* Header */}
-      <header style={{ borderBottom: `1px solid ${t.border}`, background: t.header, backdropFilter: "blur(12px)", padding: "0 32px" }}>
+      <header style={{ borderBottom: `1px solid rgba(26,222,126,0.1)`, background: `${t.bg}cc`, backdropFilter: "blur(12px)", padding: "0 32px", boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", height: 60 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
             <ShieldIcon size={26} pulse />
@@ -351,7 +359,7 @@ export default function FaceVerify({ onVerified, onLogout }) {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <ThemeToggle />
-            <button onClick={handleLogout} style={{ background: "transparent", border: `1px solid ${t.borderMid}`, color: t.textDim, fontSize: 10, letterSpacing: 1.5, padding: "5px 12px", borderRadius: 4, cursor: "pointer", fontFamily: "'Courier New', monospace" }}>
+            <button onClick={handleLogout} style={{ background: "transparent", border: `1px solid rgba(26,222,126,0.2)`, color: t.textDim, fontSize: 10, letterSpacing: 1.5, padding: "6px 14px", borderRadius: 6, cursor: "pointer", fontFamily: "'Courier New', monospace", transition: "all 0.2s", hover: { borderColor: t.green, color: t.green } }}>
               LOGOUT
             </button>
           </div>
@@ -364,13 +372,13 @@ export default function FaceVerify({ onVerified, onLogout }) {
 
           {/* Title */}
           <div style={{ textAlign: "center", marginBottom: 28 }}>
-            <div style={{ fontSize: 11, letterSpacing: 3, color: "#dcd4d4", marginBottom: 10 }}>
-              {isLocked ? "🔒 ACCOUNT LOCKED" : "◈ FACE VERIFICATION"}
+            <div style={{ fontSize: 11, letterSpacing: 3, color: t.green, marginBottom: 10 }}>
+              {isLocked ? "🔒 ACCOUNT LOCKED" : "◈ BIOMETRIC VERIFICATION"}
             </div>
             <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: 1, color: t.text }}>
               {!faceEnrolled ? "Register Your Face" : isLocked ? "Too Many Failed Attempts" : "Verify It's You"}
             </h1>
-            <p style={{ fontSize: 12, color: "#dcd4d4", marginTop: 8, lineHeight: 1.7 }}>
+            <p style={{ fontSize: 12, color: t.textMid, marginTop: 8, lineHeight: 1.7 }}>
               {isLocked
                 ? "Your account has been locked after 3 failed attempts."
                 : !faceEnrolled
@@ -379,13 +387,28 @@ export default function FaceVerify({ onVerified, onLogout }) {
             </p>
           </div>
 
-          {/* Attempt dots */}
-          {faceEnrolled && !isLocked && !isSuccess && (
-            <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 24 }}>
-              {[...Array(MAX_ATTEMPTS)].map((_, i) => (
-                <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: i < attempts ? t.red : t.borderMid, boxShadow: i < attempts ? `0 0 6px ${t.red}` : "none", transition: "all 0.3s" }} />
+          {isScanning && (
+            <motion.div style={{ display: "flex", justifyContent: "center", gap: 16, marginBottom: 24 }}>
+              {SCAN_STEPS.map((label, i) => (
+                <motion.div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                  <motion.div style={{
+                    width: 12, height: 12, borderRadius: "50%", border: "2px solid #2dd4bf",
+                    background: i < filledSteps ? "#2dd4bf" : "transparent",
+                    boxShadow: i < filledSteps ? "0 0 12px rgba(45,212,191,0.7)" : "none",
+                    transition: "all 0.35s ease",
+                  }} />
+                  <span style={{ fontSize: 9, letterSpacing: 1.5, color: i < filledSteps ? "#2dd4bf" : "#64748b" }}>{label}</span>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
+          )}
+
+          {faceEnrolled && !isLocked && !isSuccess && !isScanning && (
+            <motion.div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 28 }}>
+              {[...Array(MAX_ATTEMPTS)].map((_, i) => (
+                <motion.div key={i} style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${i < attempts ? "#f43f5e" : "#2dd4bf"}`, background: i < attempts ? "#f43f5e" : "transparent", boxShadow: i < attempts ? "0 0 8px #f43f5e" : "0 0 6px rgba(45,212,191,0.3)", transition: "all 0.4s ease", animation: i < attempts ? "none" : "pulse 2s ease-in-out infinite" }} />
+              ))}
+            </motion.div>
           )}
 
           {/* Camera circle with SVG arc */}
@@ -419,27 +442,30 @@ export default function FaceVerify({ onVerified, onLogout }) {
               </svg>
 
               {/* Camera circle */}
-              <div style={{ position: "relative", width: 240, height: 240, borderRadius: "50%", overflow: "hidden", background: t.dark ? "#020810" : "#0a1628", border: `2px solid ${borderColor}`, transition: "border-color 0.4s", zIndex: 1 }}>
+              <div style={{ position: "relative", width: 240, height: 240, borderRadius: "50%", overflow: "hidden", background: isLive || isScanning ? "linear-gradient(135deg, #020810 0%, #0a1628 100%)" : "#020810", border: `3px solid ${borderColor}`, transition: "border-color 0.4s", zIndex: 1, boxShadow: `inset 0 0 30px rgba(0,0,0,0.8), 0 0 20px ${borderColor}33` }}>
 
                 <video ref={videoRef} autoPlay playsInline muted
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: (isLive || isScanning) ? "block" : "none", transform: "scaleX(-1)" }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: (isLive || isScanning) ? "block" : "none", transform: "scaleX(-1)", filter: "contrast(1.2) brightness(0.9)" }}
                 />
 
-                {/* Face guide brackets + sweep line + countdown */}
+                {/* Face guide brackets + laser line + countdown */}
                 {(isLive || isScanning) && (
                   <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
                     {[
-                      { top: "22%",    left: "22%",  borderTop:    `2px solid ${t.green}`, borderLeft:   `2px solid ${t.green}` },
-                      { top: "22%",    right: "22%", borderTop:    `2px solid ${t.green}`, borderRight:  `2px solid ${t.green}` },
-                      { bottom: "22%", left: "22%",  borderBottom: `2px solid ${t.green}`, borderLeft:   `2px solid ${t.green}` },
-                      { bottom: "22%", right: "22%", borderBottom: `2px solid ${t.green}`, borderRight:  `2px solid ${t.green}` },
-                    ].map((s, i) => <div key={i} style={{ position: "absolute", width: 26, height: 26, ...s }} />)}
+                      { top: "22%",    left: "22%",  borderTop:    `3px solid ${t.green}`, borderLeft:   `3px solid ${t.green}` },
+                      { top: "22%",    right: "22%", borderTop:    `3px solid ${t.green}`, borderRight:  `3px solid ${t.green}` },
+                      { bottom: "22%", left: "22%",  borderBottom: `3px solid ${t.green}`, borderLeft:   `3px solid ${t.green}` },
+                      { bottom: "22%", right: "22%", borderBottom: `3px solid ${t.green}`, borderRight:  `3px solid ${t.green}` },
+                    ].map((s, i) => <div key={i} style={{ position: "absolute", width: 30, height: 30, ...s }} />)}
+                    
+                    {/* Animated laser scanning line */}
                     {isScanning && (
-                      <div style={{ position: "absolute", left: "18%", right: "18%", height: 2, background: `linear-gradient(90deg, transparent, ${t.green}, transparent)`, animation: "scan 1.2s linear infinite", boxShadow: `0 0 8px ${t.green}` }} />
+                      <div style={{ position: "absolute", left: "10%", right: "10%", height: 3, background: `linear-gradient(90deg, transparent, ${t.green}, transparent)`, animation: "laserScan 2s ease-in-out infinite", boxShadow: `0 0 12px ${t.green}, 0 0 24px ${t.green}66` }} />
                     )}
+                    
                     {isScanning && countdown > 0 && (
                       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <div style={{ fontSize: 60, fontWeight: 700, color: t.green, textShadow: `0 0 24px ${t.green}`, opacity: 0.9 }}>{countdown}</div>
+                        <div style={{ fontSize: 64, fontWeight: 700, color: t.green, textShadow: `0 0 24px ${t.green}`, opacity: 0.85 }}>{countdown}</div>
                       </div>
                     )}
                   </div>
@@ -487,8 +513,8 @@ export default function FaceVerify({ onVerified, onLogout }) {
                 )}
 
                 {isScanning && phase !== "detecting" && (
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: t.border }}>
-                    <div style={{ height: "100%", width: `${progress}%`, background: t.green, transition: "width 0.05s", boxShadow: `0 0 6px ${t.green}` }} />
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: `rgba(26,222,126,0.1)`, borderRadius: "0 0 50% 50%" }}>
+                    <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg, ${t.green}, ${t.green}cc)`, transition: "width 0.05s", boxShadow: `0 0 8px ${t.green}, inset 0 0 4px ${t.green}` }} />
                   </div>
                 )}
               </div>
@@ -496,29 +522,29 @@ export default function FaceVerify({ onVerified, onLogout }) {
 
             {/* Action buttons */}
             {isLive && (
-              <button onClick={startScan} style={{ padding: "11px 36px", borderRadius: 7, border: `1px solid ${t.green}`, background: t.green, color: "#000", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Courier New', monospace", letterSpacing: 1.5 }}>
+              <button onClick={startScan} style={{ padding: "14px 40px", borderRadius: 10, border: `2px solid ${t.green}`, background: t.green, color: "#000", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Courier New', monospace", letterSpacing: 1.5, transition: "all 0.3s ease", boxShadow: `0 4px 16px rgba(26,222,126,0.3)`, hover: { transform: "translateY(-2px)", boxShadow: `0 6px 24px rgba(26,222,126,0.4)` } }}>
                 ◈ {!faceEnrolled ? "Register My Face" : "Scan Now"}
               </button>
             )}
 
             {isScanning && phase !== "detecting" && (
-              <div style={{ fontSize: 12, color: t.textDim, letterSpacing: 1 }}>Analysing… {progress}%</div>
+              <div style={{ fontSize: 12, color: t.green, letterSpacing: 1.5, fontWeight: 600 }}>SCANNING… {progress}%</div>
             )}
 
             {isFailed && (
-              <button onClick={retry} style={{ padding: "11px 36px", borderRadius: 7, border: `1px solid ${t.red}`, background: `${t.red}14`, color: t.red, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Courier New', monospace", letterSpacing: 1 }}>
+              <button onClick={retry} style={{ padding: "14px 40px", borderRadius: 10, border: `2px solid ${t.red}`, background: `rgba(239,68,68,0.1)`, color: t.red, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Courier New', monospace", letterSpacing: 1.5, transition: "all 0.3s", boxShadow: `0 4px 16px rgba(239,68,68,0.15)` }}>
                 Try Again
               </button>
             )}
 
             {(isLocked || isError) && (
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 12, color: t.textDim, lineHeight: 1.7, marginBottom: 16 }}>
+                <div style={{ fontSize: 12, color: t.textMid, lineHeight: 1.7, marginBottom: 16, background: `rgba(239,68,68,0.05)`, padding: "12px", borderRadius: 6, borderLeft: `3px solid ${t.red}` }}>
                   {isLocked
                     ? "Your account has been locked for security. Please log out and contact support."
                     : "Please check your camera permissions and try again."}
                 </div>
-                <button onClick={handleLogout} style={{ padding: "11px 36px", borderRadius: 7, border: `1px solid ${t.borderMid}`, background: "transparent", color: t.textDim, fontSize: 12, cursor: "pointer", fontFamily: "'Courier New', monospace" }}>
+                <button onClick={handleLogout} style={{ padding: "12px 36px", borderRadius: 8, border: `1px solid rgba(26,222,126,0.2)`, background: "rgba(255,255,255,0.02)", color: t.textDim, fontSize: 12, cursor: "pointer", fontFamily: "'Courier New', monospace", letterSpacing: 1, transition: "all 0.2s" }}>
                   Back to Login
                 </button>
               </div>

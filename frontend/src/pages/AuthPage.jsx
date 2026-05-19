@@ -8,7 +8,7 @@ function InputField({ label, type = "text", value, onChange, placeholder, t }) {
   const [focused, setFocused] = useState(false);
   return (
     <div style={{ marginBottom: 20 }}>
-      <label style={{ display: "block", fontSize: 10, letterSpacing: 2, color: t.textDim, marginBottom: 8 }}>{label}</label>
+      <label style={{ display: "block", fontSize: 11, letterSpacing: 2, color: "#2dd4bf", marginBottom: 8, fontWeight: 700, fontStyle: "italic", fontFamily: "JetBrains Mono, monospace" }}>{label}</label>
       <input
         type={type}
         value={value}
@@ -18,16 +18,16 @@ function InputField({ label, type = "text", value, onChange, placeholder, t }) {
         onBlur={() => setFocused(false)}
         style={{
           width: "100%",
-          padding: "12px 16px",
-          borderRadius: 6,
+          padding: "14px 16px",
+          borderRadius: 8,
           fontSize: 13,
-          background: t.input,
+          background: `rgba(26,222,126,0.03)`,
           color: t.text,
           fontFamily: "'Courier New', monospace",
-          border: `1px solid ${focused ? t.green : t.borderMid}`,
+          border: `2px solid ${focused ? "#2dd4bf" : "rgba(45,212,191,0.3)"}`,
           outline: "none",
-          transition: "border-color 0.2s",
-          boxShadow: focused ? `0 0 0 3px ${t.green}18` : "none",
+          transition: "all 0.3s ease",
+          boxShadow: focused ? `0 0 0 4px rgba(26,222,126,0.15), inset 0 1px 2px rgba(0,0,0,0.1)` : "inset 0 1px 2px rgba(0,0,0,0.1)",
         }}
       />
     </div>
@@ -79,6 +79,18 @@ export default function AuthPage({ mode = "login", onNavigate, onLogin }) {
       // ✅ FIXED: store token with correct key
       localStorage.setItem("token", res.data.access_token);
 
+      try {
+        const stealthRes = await axios.get("http://127.0.0.1:8000/auth/stealth", {
+          headers: { Authorization: `Bearer ${res.data.access_token}` }
+        });
+        localStorage.setItem("stealth_email", email);
+        localStorage.setItem("stealth_mode", stealthRes.data.stealth_enabled);
+        localStorage.setItem("stealth_level", stealthRes.data.stealth_level);
+        localStorage.setItem("stealth_skin", stealthRes.data.decoy_skin);
+      } catch (e) {
+        console.error("Failed to load stealth settings");
+      }
+
       // optional (keep this if you're using face verification logic)
       localStorage.setItem(
         "shield_face_enrolled",
@@ -107,9 +119,9 @@ export default function AuthPage({ mode = "login", onNavigate, onLogin }) {
     fontFamily: "'Courier New', monospace",
     border: "none",
     transition: "all 0.3s",
-    background: loading ? t.borderMid : t.green,
-    color: "#fff",
-    boxShadow: loading ? "none" : `0 0 20px ${t.green}44`,
+    background: loading ? "#334155" : "#2dd4bf",
+    color: loading ? "#94a3b8" : "#0a111a",
+    boxShadow: loading ? "none" : "0 0 20px rgba(45,212,191,0.35)",
     opacity: loading ? 0.7 : 1,
   };
 
@@ -117,19 +129,29 @@ export default function AuthPage({ mode = "login", onNavigate, onLogin }) {
     <div
       style={{
         minHeight: "100vh",
-        background: t.bg,
+        background: "#0a111a",
         color: t.text,
         fontFamily: "'Courier New', monospace",
         display: "flex",
         flexDirection: "column",
       }}
     >
+      <style>{`
+        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideInDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+        .glass-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(12px); border: 1px solid rgba(26,222,126,0.15); transition: all 0.3s; }
+        .glass-card:hover { background: rgba(255,255,255,0.03); border-color: rgba(26,222,126,0.25); }
+      `}</style>
+      
+      <div style={{ position: "fixed", width: 400, height: 400, top: "-10%", right: "-10%", borderRadius: "50%", background: `${t.green}08`, filter: "blur(80px)", pointerEvents: "none" }} />
+
       <nav
         style={{
-          borderBottom: `1px solid ${t.border}`,
-          background: t.header,
+          borderBottom: `1px solid rgba(26,222,126,0.1)`,
+          background: `${t.bg}cc`,
           backdropFilter: "blur(12px)",
           padding: "0 48px",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
         }}
       >
         <div
@@ -176,20 +198,27 @@ export default function AuthPage({ mode = "login", onNavigate, onLogin }) {
           padding: "48px 24px",
         }}
       >
-        <div style={{ width: "100%", maxWidth: 440 }}>
+        <div style={{ width: "100%", maxWidth: 440, animation: "fadeUp 0.6s ease both" }}>
           <div style={{ textAlign: "center", marginBottom: 36 }}>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: t.green, marginBottom: 12 }}>◈ {isLogin ? "SECURE LOGIN" : "ACCOUNT CREATION"}</div>
             <ShieldIcon size={56} />
-            <h1 style={{ fontSize: 22, fontWeight: 700, marginTop: 16 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, marginTop: 16, letterSpacing: 1 }}>
               {isLogin ? "WELCOME BACK" : "GET PROTECTED"}
             </h1>
+            <p style={{ fontSize: 12, color: t.textMid, marginTop: 8 }}>
+              {isLogin ? "Sign in to access your digital vault" : "Create your account to start protecting"}
+            </p>
           </div>
 
           <div
+            className="glass-card"
             style={{
-              background: t.bgCard,
-              border: `1px solid ${t.border}`,
-              borderRadius: 14,
-              padding: "32px 36px",
+              borderRadius: 16,
+              padding: "40px 40px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.04)",
+              backdropFilter: "blur(12px)",
+              border: `1.5px solid rgba(26,222,126,0.2)`,
             }}
           >
             {!isLogin && (
@@ -228,7 +257,7 @@ export default function AuthPage({ mode = "login", onNavigate, onLogin }) {
             )}
 
             {error && (
-              <div style={{ color: "red", marginBottom: 10 }}>{error}</div>
+              <div style={{ background: "rgba(239,68,68,0.1)", color: t.red, marginBottom: 10, padding: "12px 14px", borderRadius: 6, fontSize: 12, borderLeft: `3px solid ${t.red}` }}>{error}</div>
             )}
 
             <button
@@ -248,7 +277,7 @@ export default function AuthPage({ mode = "login", onNavigate, onLogin }) {
                 onClick={() =>
                   onNavigate(isLogin ? "register" : "login")
                 }
-                style={{ cursor: "pointer", color: t.green }}
+                style={{ cursor: "pointer", color: t.green, fontSize: 12, transition: "all 0.2s" }}
               >
                 {isLogin
                   ? "Create account"

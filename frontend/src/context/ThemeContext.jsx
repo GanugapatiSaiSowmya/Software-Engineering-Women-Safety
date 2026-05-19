@@ -2,49 +2,54 @@ import { createContext, useContext, useState } from "react";
 
 const ThemeContext = createContext();
 
+const MINT = "#2dd4bf";
+const MIDNIGHT = "#0a111a";
+
 export function ThemeProvider({ children }) {
   const [dark, setDark] = useState(true);
-  const toggle = () => setDark(d => !d);
+  const toggle = () => setDark((d) => !d);
 
-  const t = dark ? {
-    dark,
-    bg:         "#061228",
-    bgCard:     "rgba(255,255,255,0.02)",
-    bgCardHover:"rgba(255,255,255,0.04)",
-    border:     "#065f46",
-    borderMid:  "#10b981",
-    text:       "#e2e8f0",
-    textMid:    "#94a3b8",
-    textDim:    "#d9dde4",
-    textFaint:  "#d4dce6",
-    sidebar:    "#061228",
-    header:     "#061228",
-    input:      "#0a1628",
-    green:      "#1ade7e",
-    amber:      "#f59e0b",
-    red:        "#ef4444",
-    purple:     "#818cf8",
-  } : {
-    dark,
-    // Arctic — soft blue background, white cards
-    bg:          "#cfe0f0",
-    bgCard:      "#ffffff",
-    bgCardHover: "#f4f9ff",
-    border:      "#b8d8f8",
-    borderMid:   "#8ec4f0",
-    text:        "#051425",
-    textMid:     "#071c2f",
-    textDim:     "#2b597e",
-    textFaint:   "#3d7fb6",
-    sidebar:     "#ffffff",
-    header:      "rgba(255,255,255,0.95)",
-    input:       "#f4faff",
-    // Universal traffic light
-    green:       "#22c55e",   // ✅ safe / live / protected
-    amber:       "#d97706",   // ⚠️ caution / warning
-    red:         "#dc2626",   // 🔴 danger / high risk
-    purple:      "#4f46e5",   // 🔵 info / analysis
-  };
+  const t = dark
+    ? {
+        dark,
+        bg: MIDNIGHT,
+        bgCard: "rgba(255,255,255,0.03)",
+        bgCardHover: "rgba(255,255,255,0.05)",
+        border: "rgba(255,255,255,0.05)",
+        borderMid: "rgba(45,212,191,0.35)",
+        text: "#e2e8f0",
+        textMid: "#94a3b8",
+        textDim: "#64748b",
+        textFaint: "#475569",
+        sidebar: MIDNIGHT,
+        header: "rgba(10,17,26,0.85)",
+        input: "#121c2a",
+        green: MINT,
+        mint: MINT,
+        amber: "#f59e0b",
+        red: "#f43f5e",
+        purple: "#818cf8",
+      }
+    : {
+        dark,
+        bg: "#e8f4f8",
+        bgCard: "#ffffff",
+        bgCardHover: "#f8fafc",
+        border: "rgba(45,212,191,0.25)",
+        borderMid: "rgba(45,212,191,0.5)",
+        text: "#0a111a",
+        textMid: "#334155",
+        textDim: "#64748b",
+        textFaint: "#94a3b8",
+        sidebar: "#ffffff",
+        header: "rgba(255,255,255,0.95)",
+        input: "#f1f5f9",
+        green: "#0d9488",
+        mint: "#0d9488",
+        amber: "#d97706",
+        red: "#dc2626",
+        purple: "#4f46e5",
+      };
 
   return <ThemeContext.Provider value={{ ...t, toggle }}>{children}</ThemeContext.Provider>;
 }

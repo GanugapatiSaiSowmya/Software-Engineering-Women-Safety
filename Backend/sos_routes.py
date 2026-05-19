@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-
+from auth import log_access
 from database import get_db
 
 from models import (
@@ -109,7 +109,8 @@ def delete_guardian(
 
 @router.post("/sos/trigger")
 def trigger_sos(
-    request: SOSRequest,
+    req_body: SOSRequest,
+    req: Request,
     db: Session = Depends(get_db)
 ):
 
@@ -118,9 +119,7 @@ def trigger_sos(
         sos_event = SOSEvent(
 
             id=str(uuid.uuid4()),
-
-            user_id=request.user_id,
-
+            user_id=req_body.user_id,
             status="triggered",
         )
 
@@ -128,10 +127,9 @@ def trigger_sos(
 
         db.commit()
 
-        guardians = db.query(
-            Guardian
-        ).filter(
-            Guardian.user_id == request.user_id
+        # Get guardians
+        guardians = db.query(Guardian).filter(
+            Guardian.user_id == req_body.user_id
         ).all()
 
         notifications = []
@@ -158,8 +156,14 @@ def trigger_sos(
 
             threading.Thread(
                 target=send_sos_message,
-                args=(phone, request.user_id)
+                args=(phone, req_body.user_id)
             ).start()
+
+        try:
+            uid = int(req_body.user_id)
+            log_access(db, uid, "sos_triggered", "success", req)
+        except ValueError:
+            pass
 
         return {
 

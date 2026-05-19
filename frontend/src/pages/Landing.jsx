@@ -1,151 +1,148 @@
-import { useTheme } from "../context/ThemeContext";
+import { motion } from "framer-motion";
 import ThemeToggle from "../components/ThemeToggle";
 import ShieldIcon from "../components/ShieldIcon";
 
+const MINT = "#2dd4bf";
+const BG = "#0a111a";
+
 const FEATURES = [
-  { icon: "◈", title: "Identity Vault",   desc: "Biometric enrollment with 128-d face embeddings stored only on your device." },
-  { icon: "⬡", title: "Upload Guard",     desc: "Pre-flight photo sanitizer — strips GPS, blurs sensitive objects before you post." },
-  { icon: "⚖", title: "Takedown Center",  desc: "Auto-generate evidence bundles and DMCA reports with one click." },
-  { icon: "⊕", title: "Guardian SOS",     desc: "Trusted circle alerts and real-time GPS broadcast on critical threats." },
+  { icon: "◈", title: "Identity Vault", desc: "Biometric enrollment with 128-d face embeddings stored only on your device." },
+  { icon: "⬡", title: "Upload Guard", desc: "Pre-flight photo sanitizer — strips GPS, blurs sensitive objects before you post." },
+  { icon: "⚖", title: "Takedown Center", desc: "Auto-generate evidence bundles and DMCA reports with one click." },
+  { icon: "⊕", title: "Guardian SOS", desc: "Trusted circle alerts and real-time GPS broadcast on critical threats." },
 ];
 
 const STATS = [
   { value: "2.4M+", label: "Flagged images in database" },
-  { value: "100%",  label: "Local processing, zero uploads" },
-  { value: "<2s",   label: "Average threat detection time" },
-  { value: "XAI",   label: "Explainable AI — know exactly why" },
+  { value: "100%", label: "Local processing, zero uploads" },
+  { value: "<2s", label: "Average threat detection time" },
+  { value: "XAI", label: "Explainable AI — know exactly why" },
 ];
 
-export default function Landing({ onNavigate }) {
-  const t = useTheme();
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 28 } },
+};
 
-  const heroBtn = (primary) => ({
-    padding: "14px 32px", borderRadius: 6, fontSize: 13, fontWeight: 700,
-    letterSpacing: 2, cursor: "pointer", fontFamily: "'Courier New', monospace",
-    transition: "all 0.25s",
-    background: primary ? t.green : "transparent",
-    color: primary ? "#fff" : t.green,
-    border: `2px solid ${t.green}`,
-    boxShadow: primary ? `0 0 24px ${t.green}44` : "none",
-  });
+export default function Landing({ onNavigate }) {
+  const btnBase = {
+    padding: "14px 32px",
+    borderRadius: 6,
+    fontSize: 13,
+    fontWeight: 700,
+    letterSpacing: 2,
+    cursor: "pointer",
+    fontFamily: "JetBrains Mono, monospace",
+  };
 
   return (
-    <div style={{ minHeight: "100vh", background: t.bg, color: t.text, fontFamily: "'Courier New', monospace" }}>
-      <style>{`
-        @keyframes float  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
-        @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:0.5} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-        .feat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(16,185,129,0.12) !important; }
-        .feat-card { transition: transform 0.25s, box-shadow 0.25s; }
-      `}</style>
+    <div style={{ minHeight: "100vh", background: BG, color: "#e2e8f0", fontFamily: "JetBrains Mono, monospace" }}>
+      <div style={{ position: "fixed", width: 500, height: 500, top: "-10%", right: "-10%", borderRadius: "50%", background: `${MINT}14`, filter: "blur(80px)", pointerEvents: "none" }} />
 
-      {/* Ambient glows */}
-      <div style={{ position: "fixed", width: 500, height: 500, top: "-10%", right: "-10%", borderRadius: "50%", background: `${t.green}12`, filter: "blur(80px)", pointerEvents: "none" }} />
-      <div style={{ position: "fixed", width: 300, height: 300, bottom: "5%", left: "-5%", borderRadius: "50%", background: `${t.purple}10`, filter: "blur(60px)", pointerEvents: "none" }} />
-
-      {/* Nav */}
-      <nav style={{ position: "sticky", top: 0, zIndex: 100, background: t.header, backdropFilter: "blur(12px)", borderBottom: `1px solid ${t.border}`, padding: "0 48px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", height: 64 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
+      <motion.nav
+        initial={{ y: -16, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        style={{ position: "sticky", top: 0, zIndex: 100, background: `${BG}cc`, backdropFilter: "blur(48px)", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "0 48px" }}
+      >
+        <motion.div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", height: 64 }}>
+          <motion.div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
             <ShieldIcon size={26} pulse />
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: 3, color: t.green }}>SHIELD.AI</div>
-              <div style={{ fontSize: 8, letterSpacing: 2, color: t.textFaint }}>DIGITAL BODYGUARD</div>
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+            <motion.div>
+              <motion.div style={{ fontSize: 15, fontWeight: 700, letterSpacing: 3, color: MINT }}>SHIELD.AI</motion.div>
+              <motion.div style={{ fontSize: 8, letterSpacing: 2, color: "#64748b" }}>DIGITAL BODYGUARD</motion.div>
+            </motion.div>
+          </motion.div>
+          <motion.div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <ThemeToggle />
-            <button onClick={() => onNavigate("login")} style={{ ...heroBtn(false), padding: "8px 20px", fontSize: 11 }}>LOGIN</button>
-            <button onClick={() => onNavigate("register")} style={{ ...heroBtn(true), padding: "8px 20px", fontSize: 11 }}>GET PROTECTED</button>
-          </div>
-        </div>
-      </nav>
+            <motion.button type="button" onClick={() => onNavigate("login")} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} style={{ ...btnBase, background: "transparent", color: MINT, border: `2px solid ${MINT}`, padding: "8px 20px", fontSize: 11 }}>
+              SIGN IN
+            </motion.button>
+          </motion.div>
+        </motion.div>
+      </motion.nav>
 
-      {/* Hero */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "100px 48px 80px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>
-        <div style={{ animation: "fadeUp 0.8s ease both" }}>
-          <div style={{ fontSize: 10, letterSpacing: 4, color: t.green, marginBottom: 16 }}>◈ PROACTIVE DIGITAL SAFETY</div>
-          <h1 style={{ fontSize: 48, fontWeight: 700, lineHeight: 1.15, letterSpacing: 1, marginBottom: 24 }}>
-            Your<br />
-            <span style={{ color: t.green }}>Digital</span><br />
-            Bodyguard.
-          </h1>
-          <p style={{ fontSize: 14, color: t.textMid, lineHeight: 1.8, marginBottom: 36, maxWidth: 420 }}>
-            SHIELD.ai acts as a filter between your private data and the public internet — stopping digital harm before it starts, using Explainable AI that shows you exactly why a threat is real.
-          </p>
-          <div style={{ display: "flex", gap: 16 }}>
-            <button onClick={() => onNavigate("register")} style={heroBtn(true)}>START PROTECTION</button>
-            <button onClick={() => onNavigate("login")} style={heroBtn(false)}>SIGN IN</button>
-          </div>
-        </div>
+        <motion.div initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
+          <motion.div variants={fadeUp} style={{ fontSize: 10, letterSpacing: 4, color: MINT, marginBottom: 16 }}>◈ PROACTIVE DIGITAL SAFETY</motion.div>
+          <motion.h1 variants={fadeUp} style={{ fontSize: 48, fontWeight: 700, lineHeight: 1.15, marginBottom: 24, color: "#fff" }}>
+            Your<br /><span style={{ color: MINT }}>Digital</span><br />Bodyguard.
+          </motion.h1>
+          <motion.p variants={fadeUp} style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.8, marginBottom: 36, maxWidth: 420 }}>
+            SHIELD.AI acts as a filter between your private data and the public internet — stopping digital harm before it starts.
+          </motion.p>
+          <motion.div variants={fadeUp} style={{ display: "flex", gap: 16 }}>
+            <motion.button type="button" onClick={() => onNavigate("register")} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} style={{ ...btnBase, background: MINT, color: BG, border: `2px solid ${MINT}`, boxShadow: `0 0 24px ${MINT}44` }}>
+              START PROTECTION
+            </motion.button>
+            <motion.button type="button" onClick={() => onNavigate("login")} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} style={{ ...btnBase, background: "transparent", color: MINT, border: `2px solid ${MINT}` }}>
+              SIGN IN
+            </motion.button>
+          </motion.div>
+        </motion.div>
 
-        {/* Animated shield graphic */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", animation: "float 5s ease-in-out infinite" }}>
-          <div style={{ position: "relative", width: 280, height: 280 }}>
-            <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: `1px solid ${t.green}22`, animation: "pulse 3s ease-in-out infinite" }} />
-            <div style={{ position: "absolute", inset: 20, borderRadius: "50%", border: `1px solid ${t.green}33` }} />
-            <div style={{ position: "absolute", inset: 40, borderRadius: "50%", border: `1px solid ${t.green}44` }} />
-            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <ShieldIcon size={120} pulse />
-            </div>
-            {/* Orbit dots */}
-            {FEATURES.map((_, i) => {
+        <motion.div animate={{ y: [0, -16, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} style={{ display: "flex", justifyContent: "center" }}>
+          <motion.div style={{ position: "relative", width: 320, height: 320 }}>
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 12, repeat: Infinity, ease: "linear" }} style={{ position: "absolute", inset: 0, borderRadius: "50%", border: `2px solid ${MINT}33` }} />
+            <motion.div animate={{ rotate: -360 }} transition={{ duration: 16, repeat: Infinity, ease: "linear" }} style={{ position: "absolute", inset: 20, borderRadius: "50%", border: `2px solid ${MINT}44` }} />
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} style={{ position: "absolute", inset: 40, borderRadius: "50%", border: `1px solid ${MINT}55` }} />
+            <motion.div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ShieldIcon size={140} pulse />
+            </motion.div>
+            {FEATURES.map((f, i) => {
               const angle = (i / FEATURES.length) * 360;
-              const rad   = (angle * Math.PI) / 180;
-              const x     = 140 + 120 * Math.cos(rad) - 16;
-              const y     = 140 + 120 * Math.sin(rad) - 16;
+              const rad = (angle * Math.PI) / 180;
               return (
-                <div key={i} style={{ position: "absolute", left: x, top: y, width: 32, height: 32, borderRadius: "50%", background: t.bgCard, border: `1px solid ${t.green}44`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: t.green }}>
-                  {_.icon}
-                </div>
+                <motion.div
+                  key={f.title}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 3, repeat: Infinity, delay: i * 0.3 }}
+                  style={{ position: "absolute", left: 160 + 140 * Math.cos(rad) - 20, top: 160 + 140 * Math.sin(rad) - 20, width: 40, height: 40, borderRadius: "50%", border: `2px solid ${MINT}44`, display: "flex", alignItems: "center", justifyContent: "center", color: MINT, fontSize: 16 }}
+                >
+                  {f.icon}
+                </motion.div>
               );
             })}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
-      {/* Stats bar */}
-      <div style={{ background: t.bgCard, borderTop: `1px solid ${t.border}`, borderBottom: `1px solid ${t.border}` }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 48px", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 24 }}>
+      <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} style={{ borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)", backdropFilter: "blur(48px)" }}>
+        <motion.div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 48px", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 24 }}>
           {STATS.map((s, i) => (
-            <div key={i} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: t.green, letterSpacing: 1 }}>{s.value}</div>
-              <div style={{ fontSize: 10, color: t.textDim, letterSpacing: 1.5, marginTop: 4 }}>{s.label}</div>
-            </div>
+            <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }} style={{ textAlign: "center" }}>
+              <motion.div style={{ fontSize: 24, fontWeight: 700, color: MINT }}>{s.value}</motion.div>
+              <motion.div style={{ fontSize: 10, color: "#64748b", letterSpacing: 1.5, marginTop: 4 }}>{s.label}</motion.div>
+            </motion.div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Features grid */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "80px 48px" }}>
-        <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <div style={{ fontSize: 10, letterSpacing: 4, color: t.green, marginBottom: 12 }}>⬡ COMMAND MODULES</div>
-          <h2 style={{ fontSize: 28, fontWeight: 700, letterSpacing: 1 }}>Five Layers of Protection</h2>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20 }}>
-          {FEATURES.map((f, i) => (
-            <div key={i} className="feat-card" style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 12, padding: "28px 24px" }}>
-              <div style={{ fontSize: 28, color: t.green, marginBottom: 14 }}>{f.icon}</div>
-              <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 1.5, marginBottom: 10, color: t.text }}>{f.title}</div>
-              <div style={{ fontSize: 12, color: t.textMid, lineHeight: 1.7 }}>{f.desc}</div>
-            </div>
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} style={{ textAlign: "center", marginBottom: 52 }}>
+          <motion.div style={{ fontSize: 10, letterSpacing: 4, color: MINT, marginBottom: 12 }}>⬡ COMMAND MODULES</motion.div>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: "#fff" }}>Five Layers of Protection</h2>
+        </motion.div>
+        <motion.div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20 }} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={{ visible: { transition: { staggerChildren: 0.08 } } }}>
+          {FEATURES.map((f) => (
+            <motion.div key={f.title} variants={fadeUp} whileHover={{ y: -4 }} style={{ borderRadius: 12, padding: "28px 24px", background: "rgba(255,255,255,0.02)", backdropFilter: "blur(48px)", border: `1px solid ${MINT}22` }}>
+              <motion.div style={{ fontSize: 28, color: MINT, marginBottom: 14 }}>{f.icon}</motion.div>
+              <motion.div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 1.5, marginBottom: 10, color: "#fff" }}>{f.title}</motion.div>
+              <motion.div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.7 }}>{f.desc}</motion.div>
+            </motion.div>
           ))}
-          {/* CTA card */}
-          <div className="feat-card" onClick={() => onNavigate("register")}
-            style={{ background: `${t.green}10`, border: `1px solid ${t.green}44`, borderRadius: 12, padding: "28px 24px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 12 }}>
+          <motion.div variants={fadeUp} whileHover={{ scale: 1.02 }} onClick={() => onNavigate("register")} style={{ borderRadius: 12, padding: "28px 24px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, border: `1px solid ${MINT}44`, background: `${MINT}0d`, backdropFilter: "blur(48px)" }}>
             <ShieldIcon size={40} pulse />
-            <div style={{ fontSize: 13, fontWeight: 700, color: t.green, letterSpacing: 1.5 }}>START NOW</div>
-            <div style={{ fontSize: 11, color: t.textDim }}>Free · Local · Private</div>
-          </div>
-        </div>
+            <motion.div style={{ fontSize: 13, fontWeight: 700, color: MINT }}>START NOW</motion.div>
+            <motion.div style={{ fontSize: 11, color: "#64748b" }}>Free · Local · Private</motion.div>
+          </motion.div>
+        </motion.div>
       </section>
 
-      {/* Footer */}
-      <footer style={{ borderTop: `1px solid ${t.border}`, padding: "24px 48px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ fontSize: 10, color: t.textFaint, letterSpacing: 1.5 }}>SHIELD.AI — DIGITAL BODYGUARD © 2026</div>
-          <div style={{ fontSize: 10, color: t.green }}>◈ 100% LOCAL · ZERO CLOUD</div>
-        </div>
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "24px 48px" }}>
+        <motion.div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", justifyContent: "space-between", fontSize: 10, color: "#64748b", letterSpacing: 1.5 }}>
+          <span>SHIELD.AI — DIGITAL BODYGUARD © 2026</span>
+          <span style={{ color: MINT }}>◈ 100% LOCAL · ZERO CLOUD</span>
+        </motion.div>
       </footer>
     </div>
   );

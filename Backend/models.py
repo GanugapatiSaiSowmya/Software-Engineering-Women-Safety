@@ -150,17 +150,30 @@ class HighAlert(Base):
 
     __tablename__ = "high_alerts"
 
-    user_id = Column(
-        String,
-        primary_key=True
-    )
+    user_id = Column(String, primary_key=True)
+    enabled = Column(Boolean, default=False)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    enabled = Column(
-        Boolean,
-        default=False
-    )
 
-    updated_at = Column(
-        DateTime(timezone=True),
-        onupdate=func.now()
-    )
+class StealthSettings(Base):
+    __tablename__ = "stealth_settings"
+
+    user_id           = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    stealth_enabled   = Column(Boolean, default=False)
+    stealth_level     = Column(Integer, default=1)
+    decoy_skin        = Column(String(50), default="calculator")
+    hashed_secret_key = Column(String(255), nullable=True)
+    updated_at        = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+
+class AccessLog(Base):
+    __tablename__ = "access_logs"
+
+    id          = Column(String(36), primary_key=True)
+    user_id     = Column(Integer, ForeignKey("users.id"), nullable=True)
+    event_type  = Column(String(50), nullable=False)
+    timestamp   = Column(DateTime(timezone=True), server_default=func.now())
+    ip_address  = Column(String(50), nullable=True)
+    device_info = Column(String(255), nullable=True)
+    status      = Column(String(20), nullable=False)

@@ -49,32 +49,12 @@ Phone Number: +9191+ 6767676767
 Message: 🚨 GUARDIAN SOS ALERT 🚨Emergency triggered by user.Please respond immediately.
 --------------------
 Date: 19/5/2026
-Time: 1:4
+Time: 16:59
 Phone Number: +919591738633
-Message: 🚨 TRUSTED CONTACT ALERT 🚨default_user has triggered a safety alert.Please check on them immediately.
+Message: 🚨 GUARDIAN SOS ALERT 🚨Emergency triggered by user.Please respond immediately.
 --------------------
 Date: 19/5/2026
-Time: 1:4
-Phone Number: +9191087 10432
-Message: 🚨 TRUSTED CONTACT ALERT 🚨default_user has triggered a safety alert.Please check on them immediately.
---------------------
-Date: 19/5/2026
-Time: 1:6
-Phone Number: +9191087 10432
-Message: 🚨 TRUSTED CONTACT ALERT 🚨default_user has triggered a safety alert.Please check on them immediately.
---------------------
-Date: 19/5/2026
-Time: 12:5
-Phone Number: +9191087 10432
-Message: 🚨 TRUSTED CONTACT ALERT 🚨default_user has triggered a safety alert.Please check on them immediately.
---------------------
-Date: 19/5/2026
-Time: 12:39
-Phone Number: +9191087 10432
-Message: 🚨 TRUSTED CONTACT ALERT 🚨default_user has triggered a safety alert.Please check on them immediately.
---------------------
-Date: 19/5/2026
-Time: 13:5
-Phone Number: +9191087 10432
-Message: 🚨 TRUSTED CONTACT ALERT 🚨default_user has triggered a safety alert.Please check on them immediately.
+Time: 17:3
+Phone Number: +919591738633
+Message: 🚨 GUARDIAN SOS ALERT 🚨Emergency triggered by user.Please respond immediately.
 --------------------
