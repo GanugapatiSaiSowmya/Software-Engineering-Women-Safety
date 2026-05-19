@@ -66,9 +66,6 @@ export default function SupportHub() {
                 <HelpCircle size={20} color="var(--neon-teal)" />
                 KNOWLEDGE BASE
               </div>
-              <p style={{ color: "var(--slate-400)", fontSize: 13, lineHeight: 1.6, maxWidth: 600 }}>
-                Access intelligence reports and common platform queries. If your query is not listed, proceed to DIRECT COMMS.
-              </p>
             </div>
             
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -118,7 +115,6 @@ export default function SupportHub() {
                 TACTICAL RESOURCES
               </div>
               <p style={{ color: "var(--slate-400)", fontSize: 13, lineHeight: 1.6, maxWidth: 600 }}>
-                Equip yourself with advanced protocols and strategies to maintain digital security and operational integrity.
               </p>
             </div>
             

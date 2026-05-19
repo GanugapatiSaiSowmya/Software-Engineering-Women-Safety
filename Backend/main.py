@@ -62,6 +62,7 @@ async def upload_image(file: UploadFile = File(...)):
     ai_results = detect_deepfake(file_path)
 
     # 3. Apply image protection (adversarial noise, watermark, honey pixels, smart blur)
+    protected_filename = None
     try:
         img = Image.open(file_path).convert("RGB")
         protected_img = protect_image(img)
@@ -69,8 +70,11 @@ async def upload_image(file: UploadFile = File(...)):
         protected_filename = f"{base}-protected{ext if ext else '.jpg'}"
         protected_path = os.path.join(UPLOAD_DIR, protected_filename)
         protected_img.save(protected_path)
+        print(f"[image_protection] Successfully protected: {protected_filename}")
     except Exception as e:
         print(f"[image_protection] Failed: {e}")
+        import traceback
+        traceback.print_exc()
         protected_filename = None
 
     # 4. Evidence report

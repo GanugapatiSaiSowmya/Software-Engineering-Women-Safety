@@ -65,7 +65,7 @@ export default function Settings() {
   ];
 
   const inputClass = "w-full px-4 py-3.5 rounded-lg bg-[#121c2a] text-slate-200 border border-white/10 mono text-sm focus:border-[#2dd4bf]/50 focus:outline-none transition-colors";
-  const labelClass = "block text-[11px] mono text-[#2dd4bf] font-bold italic tracking-widest mb-3";
+  const labelClass = "block text-[11px] mono text-[#2dd4bf] font-bold italic tracking-widest mb-4";
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-10 max-w-2xl">
@@ -99,14 +99,14 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card glass-card-mint p-10 md:p-12"
+          className="glass-card glass-card-mint p-10 md:p-14"
         >
           <h2 className="text-lg font-bold text-[#2dd4bf] tracking-wide mb-10 mono">
             STEALTH PROTOCOLS
           </h2>
 
           {/* Stealth mode toggle row */}
-          <div className="flex items-center justify-between mb-14 p-6 rounded-xl bg-white/[0.02] border border-white/5 gap-6">
+          <div className="flex items-center justify-between mb-12 p-6 rounded-xl bg-white/[0.02] border border-white/5 gap-6">
             <div>
               <p className="text-sm font-semibold text-white">Stealth Mode</p>
               <p className="text-xs text-slate-500 mt-2 leading-relaxed">
@@ -120,10 +120,10 @@ export default function Settings() {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              className="space-y-10"
+              className="space-y-0"
             >
               {/* Security level */}
-              <div>
+              <div className="mb-20">
                 <label className={labelClass}>SECURITY LEVEL</label>
                 <select
                   value={stealthLevel}
@@ -131,15 +131,15 @@ export default function Settings() {
                   className={inputClass}
                 >
                   <option value={1}>Level 1 — Standard login</option>
-                  <option value={2}>Level 2 — Decoy unlocks normal login</option>
-                  <option value={3}>Level 3 — Decoy unlocks biometric verify</option>
+                  <option value={2}>Level 2 (Hidden) — Decoy unlocks normal login</option>
+                  <option value={3}>Level 3 (Hidden) — Decoy unlocks biometric verify</option>
                 </select>
               </div>
 
               {(stealthLevel === 2 || stealthLevel === 3) && (
                 <>
                   {/* Decoy skin */}
-                  <div>
+                  <div className="mb-20">
                     <label className={labelClass}>DECOY SKIN</label>
                     <select
                       value={decoySkin}
@@ -154,7 +154,7 @@ export default function Settings() {
                   </div>
 
                   {/* Secret decoy key */}
-                  <div>
+                  <div className="mb-10">
                     <label className={labelClass}>SECRET DECOY KEY</label>
                     <input
                       type="password"
@@ -164,7 +164,11 @@ export default function Settings() {
                       className={inputClass}
                     />
                     <p className="text-[11px] text-slate-600 mt-3 leading-relaxed">
-                      Calculator: type key + press = · Weather/News: search bar · Notes: title/body + save
+                      {decoySkin === "calculator"
+                        ? "For Calculator: Type key and press =."
+                        : decoySkin === "weather" || decoySkin === "news"
+                        ? "Weather/News: search bar"
+                        : "Notes: title/body + save"}
                     </p>
                   </div>
                 </>
@@ -177,7 +181,7 @@ export default function Settings() {
             type="button"
             onClick={saveStealth}
             disabled={stealthSaving}
-            className="mt-16 mono text-xs tracking-widest px-8 py-3.5 rounded-md bg-[#2dd4bf] text-[#0a111a] font-bold disabled:opacity-50"
+            className="mt-6 mono text-xs tracking-widest px-8 py-3.5 rounded-md bg-[#2dd4bf] text-[#0a111a] font-bold disabled:opacity-50"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -191,7 +195,7 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-10 md:p-12 overflow-x-auto"
+          className="glass-card p-10 md:p-14 overflow-x-auto"
         >
           <h2 className="text-lg font-bold text-[#2dd4bf] tracking-wide mb-10 mono">
             ACCESS LOGS

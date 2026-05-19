@@ -226,19 +226,32 @@ export default function UploadGuard() {
                 </motion.div>
               </div>
 
-              {protectedUrl && (
-                <motion.a
-                  href={protectedUrl}
-                  download={finalFilename || "protected-image.jpg"}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(45,212,191,0.4)" }}
-                  className="glass-card flex items-center justify-center gap-3 py-5 bg-[#2dd4bf] text-[#0a111a] font-bold tracking-widest text-sm no-underline"
-                >
-                  <Download size={20} />
-                  EXECUTE PURGE &amp; SECURE DOWNLOAD
-                </motion.a>
-              )}
+              <motion.button
+                onClick={(e) => {
+                  if (protectedUrl) {
+                    const a = document.createElement("a");
+                    a.href = protectedUrl;
+                    a.download = finalFilename || "protected-image.jpg";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                  } else {
+                    showToast("Protected file is being prepared. Please try again.", "alert");
+                  }
+                }}
+                disabled={!protectedUrl}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: protectedUrl ? 1.02 : 1 }}
+                className={`flex items-center justify-center gap-3 py-4 px-8 font-bold tracking-widest text-sm rounded-lg transition-all ${
+                  protectedUrl 
+                    ? "bg-[#2dd4bf] text-slate-900 cursor-pointer shadow-lg hover:shadow-xl" 
+                    : "bg-slate-700 text-slate-500 cursor-not-allowed opacity-50"
+                }`}
+              >
+                <Download size={30} strokeWidth={2.5} />
+                <span>EXECUTE PURGE &amp; SECURE DOWNLOAD</span>
+              </motion.button>
             </>
           ) : !analyzing && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card flex flex-col items-center justify-center min-h-[380px] gap-4 text-center bg-[#121c2a]/60">
