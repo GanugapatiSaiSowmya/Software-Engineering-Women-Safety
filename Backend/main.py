@@ -2,34 +2,75 @@ import os
 import shutil
 import mimetypes
 import json
-from typing import Optional
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session
 
-from database import engine, Base, get_db
-from auth import router as auth_router
-from sos_routes import router as sos_router
-from metadata_agent import get_gps_data, strip_gps
-from vision_agent import detect_deepfake
-from legal_agent import generate_evidence_report
-from image_protection import protect_image
-from takedown_agent import create_takedown_report, TakedownReport
-from guardian_alert import alert_guardians_on_deepfake_detection
-from models import Guardian
-from PIL import Image
-from whatsapp_sender import (
-    send_sos_message,
-    send_takedown_alert
+from typing import Optional
+
+from fastapi import (
+    FastAPI,
+    File,
+    UploadFile,
+    Form,
+    HTTPException,
+    Depends
 )
 
-import threading
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
-# Create all tables on startup
+from sqlalchemy.orm import Session
+
+from profile_routes import router as profile_router
+
+from database import (
+    engine,
+    Base,
+    get_db
+)
+
+from auth import (
+    router as auth_router,
+    get_current_user
+)
+
+from sos_routes import router as sos_router
+
+from metadata_agent import (
+    get_gps_data,
+    strip_gps
+)
+
+from vision_agent import detect_deepfake
+
+from legal_agent import generate_evidence_report
+
+from image_protection import protect_image
+
+from takedown_agent import (
+    create_takedown_report,
+    TakedownReport
+)
+
+from guardian_alert import (
+    alert_guardians_on_deepfake_detection
+)
+
+from models import (
+    Guardian,
+    User
+)
+
+from PIL import Image
+from whatsapp_sender import send_sos_message
+
+
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="SHIELD.ai API", version="2.0.0")
+app = FastAPI(
+    title="SHIELD.ai API",
+    version="2.0.0"
+)
+
+app.include_router(profile_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,113 +80,286 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routers
 app.include_router(auth_router)
 app.include_router(sos_router)
 
+
 UPLOAD_DIR = "uploads"
-if not os.path.exists(UPLOAD_DIR):
-    os.makedirs(UPLOAD_DIR)
+
+if not os.path.exists(
+    UPLOAD_DIR
+):
+    os.makedirs(
+        UPLOAD_DIR
+    )
 
 
 @app.get("/")
 def read_root():
-    return {"message": "SHIELD.ai Backend is Active", "version": "2.0.0"}
 
+    return {
+
+        "message":
+
+        "SHIELD.ai Backend is Active",
+
+        "version":
+
+        "2.0.0"
+    }
 
 @app.post("/upload")
-async def upload_image(file: UploadFile = File(...)):
-    safe_filename = os.path.basename(file.filename)
-    file_path = os.path.join(UPLOAD_DIR, safe_filename)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+async def upload_image(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
 
-    # 1. GPS metadata check
-    gps_info = get_gps_data(file_path)
+    safe_filename = os.path.basename(
+        file.filename
+    )
 
-    # 2. AI deepfake detection
-    ai_results = detect_deepfake(file_path)
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        safe_filename
+    )
 
-    # 3. Apply image protection (adversarial noise, watermark, honey pixels, smart blur)
-    try:
-        img = Image.open(file_path).convert("RGB")
-        protected_img = protect_image(img)
-        base, ext = os.path.splitext(file.filename)
-        protected_filename = f"{base}-protected{ext if ext else '.jpg'}"
-        protected_path = os.path.join(UPLOAD_DIR, protected_filename)
-        protected_img.save(protected_path)
-    except Exception as e:
-        print(f"[image_protection] Failed: {e}")
-        protected_filename = None
+    with open(
+        file_path,
+        "wb"
+    ) as buffer:
 
-    # 4. Evidence report
-    report_file = generate_evidence_report(safe_filename, ai_results['score'], gps_info)
+        shutil.copyfileobj(
+            file.file,
+            buffer
+        )
 
-    return {
-        "filename":           safe_filename,
-        "gps":                gps_info,
-        "ai_results":         ai_results,
-        "protected_filename": protected_filename,
-        "protected_url":      f"http://127.0.0.1:8000/download-protected/{protected_filename}" if protected_filename else None,
-        "report_url":         f"http://127.0.0.1:8000/download-report/{report_file}",
-    }
+    gps_info = get_gps_data(
+        file_path
+    )
 
+    ai_results = detect_deepfake(
+        file_path
+    )
 
-@app.post("/strip")
-async def strip_image(filename: str = Form(...)):
-    safe_filename = os.path.basename(filename)
-    file_path = os.path.join(UPLOAD_DIR, safe_filename)
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="File not found")
-
-    base, ext     = os.path.splitext(safe_filename)
-    stripped_name  = f"{base}-stripped{ext}"
-    stripped_path  = os.path.join(UPLOAD_DIR, stripped_name)
+    gps_removed = False
 
     try:
-        shutil.copyfile(file_path, stripped_path)
-        removed = strip_gps(stripped_path)
+
+        gps_removed = strip_gps(
+            file_path
+        )
+
+    except Exception:
+
+        pass
+
+
+    protected_filename = None
+
+    try:
+
+        img = Image.open(
+            file_path
+        ).convert(
+            "RGB"
+        )
+
+        protected_img = protect_image(
+            img
+        )
+
+        base, ext = os.path.splitext(
+            file.filename
+        )
+
+        protected_filename = (
+
+            f"{base}-protected"
+
+            f"{ext if ext else '.jpg'}"
+
+        )
+
+        protected_path = os.path.join(
+
+            UPLOAD_DIR,
+
+            protected_filename
+        )
+
+        protected_img.save(
+            protected_path
+        )
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
-    gps_found_after = get_gps_data(stripped_path)
-
-    return {
-        "status":            "Success",
-        "original":          safe_filename,
-        "stripped_filename": stripped_name,
-        "gps_removed":       bool(removed),
-        "gps_found":         gps_found_after is not None,
-        "coordinates":       gps_found_after if gps_found_after else None,
-    }
+        print(e)
 
 
-@app.get("/download-protected/{filename}") # Added {filename}
-async def download_protected(filename: str):
-    safe_filename = os.path.basename(filename)
-    protected_path = os.path.join(UPLOAD_DIR, safe_filename)
-    if not os.path.exists(protected_path):
-        raise HTTPException(status_code=404, detail="Protected file not found")
-    mime_type, _ = mimetypes.guess_type(protected_path)
-    return FileResponse(
-        path       = protected_path,
-        filename   = safe_filename,
-        media_type = mime_type or "application/octet-stream",
+    report_file = generate_evidence_report(
+
+        safe_filename,
+
+        ai_results["score"],
+
+        gps_info
     )
 
 
-@app.get("/download")
-async def download(filename: str):
-    """Serve the metadata-stripped version of an image"""
-    safe_filename = os.path.basename(filename)
-    base, ext = os.path.splitext(safe_filename)
-    stripped_name = f"{base}-stripped{ext}"
-    stripped_path = os.path.join(UPLOAD_DIR, stripped_name)
+    return {
 
-    if not os.path.exists(stripped_path):
-        raise HTTPException(status_code=404, detail="Stripped file not found")
+        "filename":
+        safe_filename,
 
-    mime_type, _ = mimetypes.guess_type(stripped_path)
+        "gps":
+        gps_info,
+
+        "gps_removed":
+        gps_removed,
+
+        "ai_results":
+        ai_results,
+
+        "protected_filename":
+        protected_filename,
+
+        "final_filename":
+        protected_filename,
+
+        "protected_url":
+
+        f"http://127.0.0.1:8000/download-protected/{protected_filename}"
+
+        if protected_filename
+
+        else None,
+
+        "report_url":
+
+        f"http://127.0.0.1:8000/download-report/{report_file}"
+
+    }
+
+# FIXED UPLOAD ROUTE
+
+
+
+
+@app.post("/strip")
+async def strip_image(
+    filename: str = Form(...)
+):
+
+    safe_filename = os.path.basename(
+        filename
+    )
+
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        safe_filename
+    )
+
+    if not os.path.exists(
+        file_path
+    ):
+
+        raise HTTPException(
+
+            status_code=404,
+
+            detail="File not found"
+        )
+
+    base, ext = os.path.splitext(
+        safe_filename
+    )
+
+    stripped_name = (
+        f"{base}-stripped{ext}"
+    )
+
+    stripped_path = os.path.join(
+        UPLOAD_DIR,
+        stripped_name
+    )
+
+    shutil.copyfile(
+        file_path,
+        stripped_path
+    )
+
+    removed = strip_gps(
+        stripped_path
+    )
+
+    gps_found_after = get_gps_data(
+        stripped_path
+    )
+
+    return {
+
+        "status":
+
+        "Success",
+
+        "original":
+
+        safe_filename,
+
+        "stripped_filename":
+
+        stripped_name,
+
+        "gps_removed":
+
+        bool(
+            removed
+        ),
+
+        "gps_found":
+
+        gps_found_after is not None,
+
+        "coordinates":
+
+        gps_found_after
+    }
+
+
+@app.get(
+    "/download-protected/{filename}"
+)
+async def download_protected(
+    filename: str
+):
+
+    safe_filename = os.path.basename(
+        filename
+    )
+
+    protected_path = os.path.join(
+
+        UPLOAD_DIR,
+
+        safe_filename
+    )
+
+    if not os.path.exists(
+        protected_path
+    ):
+
+        raise HTTPException(
+
+            status_code=404,
+
+            detail=
+            "Protected file not found"
+        )
+
+    mime_type, _ = mimetypes.guess_type(
+        protected_path
+    )
+
     return FileResponse(
         path       = stripped_path,
         filename   = stripped_name,
@@ -228,20 +442,12 @@ async def generate_takedown_package(
         # Get guardians from database
         guardians = db.query(Guardian).filter(Guardian.user_id == user_id).all()
         guardians_list = [
-            {
-                "name": g.name,
-                "phone": g.phone
-            }
-            for g in guardians
+            {"name": g.name, "phone": g.phone, "email": g.email} for g in guardians
         ]
 
-        # Alert trusted contacts if they exist
-
+        # Alert guardians if they exist
         alert_summary = {}
-
         if guardians_list:
-
-            # Existing alert system
             alert_summary = alert_guardians_on_deepfake_detection(
                 user_id=user_id,
                 user_name=user_name,
@@ -253,20 +459,6 @@ async def generate_takedown_package(
                 report_id=reporter.report_id,
                 urls=urls_list,
             )
-
-            # WhatsApp alerts
-            for g in guardians_list:
-
-                phone = g["phone"]
-
-                # Add +91 automatically if missing
-                if not phone.startswith("+91"):
-                    phone = f"+91{phone}"
-
-                threading.Thread(
-                    target=send_takedown_alert,
-                    args=(phone, user_name)
-                ).start()
 
         return {
             "status": "success",
@@ -308,40 +500,26 @@ async def download_report(report_name: str):
         raise HTTPException(status_code=404, detail="Report not found")
 
     return FileResponse(
-        path=report_path,
-        filename=safe_report_name,
-        media_type="application/pdf",
+
+        path=
+        report_path,
+
+        filename=
+        safe_name,
+
+        media_type=
+        "application/pdf"
     )
+
 
 @app.post("/sos")
 async def trigger_sos():
 
-    try:
+    send_sos_message()
 
-        send_sos_message()
-
-        return {
-            "status": "success",
-            "message": "Guardian SOS triggered successfully"
-        }
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=500,
-            detail=f"SOS trigger failed: {str(e)}"
-        )
-        
-
-@app.get("/takedown/status/{report_id}")
-async def get_takedown_status(report_id: str):
-    """Check status of a takedown request (future: with real API integration)"""
     return {
-        "report_id": report_id,
-        "status": "pending_user_action",
-        "platforms": ["instagram", "twitter", "facebook"],
-        "reported_urls": 0,
-        "removed_urls": 0,
-        "police_complaint_filed": False,
-        "last_updated": "2026-05-03T11:30:00",
+
+        "status":
+
+        "success"
     }
