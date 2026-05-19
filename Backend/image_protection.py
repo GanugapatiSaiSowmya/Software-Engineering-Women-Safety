@@ -57,16 +57,24 @@ def apply_smart_blur(img):
     return Image.fromarray(cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB))
 
 def protect_image(img):
-    # Step 1: Adversarial noise
-    img = apply_adversarial_noise(img)
+    try:
+        # Step 1: Adversarial noise
+        img = apply_adversarial_noise(img)
 
-    # Step 2: Watermark
-    img = embed_watermark(img)
+        # Step 2: Watermark
+        img = embed_watermark(img)
 
-    # Step 3: Honey pixels
-    img = apply_honey_pixels(img)
+        # Step 3: Honey pixels
+        img = apply_honey_pixels(img)
 
-    # Step 4: Smart Blur (NEW)
-    img = apply_smart_blur(img)
+        # Step 4: Smart Blur (NEW)
+        try:
+            img = apply_smart_blur(img)
+        except Exception as blur_error:
+            print(f"[smart_blur] Warning - skipping smart blur: {blur_error}")
+            # Continue without smart blur if it fails
 
-    return img
+        return img
+    except Exception as e:
+        print(f"[protect_image] Error during protection: {e}")
+        raise
